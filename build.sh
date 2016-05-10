@@ -30,37 +30,38 @@ do
 	UBOOT_CNAME="$(echo $i | cut -d = -f 1)"
 	UBOOT_AOSCNAME="$(echo $i | cut -d = -f 2)"
 	echo "Building u-boot for device $UBOOT_AOSCNAME..."
-	tar xf $UBOOT_SRC
-	pushd $UBOOT_DIR
-	mkdir -p $LOG_DIR/u-boot-$UBOOT_AOSCNAME
-	make ${UBOOT_CNAME}_defconfig > $LOG_DIR/u-boot-$UBOOT_AOSCNAME/config.log 2>&1
+	tar xf "$UBOOT_SRC"
+	pushd "$UBOOT_DIR"
+	mkdir -p "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"
+	make "${UBOOT_CNAME}"_defconfig > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/config.log 2>&1
 	echo "Configured"
-	make CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- > $LOG_DIR/u-boot-$UBOOT_AOSCNAME/build.log 2>&1
+	make CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/build.log 2>&1
 	echo "Built"
-	mkdir -p $OUT_DIR/u-boot-$UBOOT_AOSCNAME/
-	cp u-boot-sunxi-with-spl.bin $OUT_DIR/u-boot-$UBOOT_AOSCNAME/
+	mkdir -p "$OUT_DIR"/u-boot-"$UBOOT_AOSCNAME"/
+	cp u-boot-sunxi-with-spl.bin "$OUT_DIR"/u-boot-"$UBOOT_AOSCNAME"/
 	echo "Copied"
 	popd
-	rm -r $UBOOT_DIR
+	rm -r "$UBOOT_DIR"
 done
 
 echo "Building linux..."
 
 if [ "$BUILD_LINUX" != "0" ]; then
 	echo "Building linux for KVM-enabled sunxi CPUs..."
-	tar xf $LINUX_SRC
-	pushd $LINUX_DIR
-	mkdir -p $LOG_DIR/linux-sunxi-kvm
+	tar xf "$LINUX_SRC"
+	pushd "$LINUX_DIR"
+	mkdir -p "$LOG_DIR"/linux-sunxi-kvm
 	cp ../sunxi-kvm-config .config
 	echo "Configured"
-	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- -j5 > $LOG_DIR/linux-sunxi-kvm/build.log 2>&1
+	# FIXME: hard coded parallel.
+	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- -j5 > "$LOG_DIR"/linux-sunxi-kvm/build.log 2>&1
 	echo "Built"
 	TMPDIR=$(mktemp -d)
-	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- INSTALL_MOD_PATH=$TMPDIR modules_install > $LOG_DIR/linux-sunxi-kvm/modules_install.log 2>&1
-	mkdir -p $OUT_DIR/linux-sunxi-kvm
-	cp arch/arm/boot/zImage $OUT_DIR/linux-sunxi-kvm/
-	cp -r $TMPDIR/lib/modules/ $OUT_DIR/linux-sunxi-kvm/
-	rm -r $TMPDIR
+	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- INSTALL_MOD_PATH="$TMPDIR" modules_install > "$LOG_DIR"/linux-sunxi-kvm/modules_install.log 2>&1
+	mkdir -p "$OUT_DIR"/linux-sunxi-kvm
+	cp arch/arm/boot/zImage "$OUT_DIR"/linux-sunxi-kvm/
+	cp -r "$TMPDIR"/lib/modules/ "$OUT_DIR"/linux-sunxi-kvm/
+	rm -r "$TMPDIR"
 	echo "Copied"
 	popd
 fi
@@ -68,11 +69,11 @@ fi
 echo "Building DTBs..."
 
 [ "$BUILD_DTB" != "0" ] &&
-for i in $DTB_TARGETS
+for i in "$DTB_TARGETS"
 do
 	DTB_CNAME="$(echo $i | cut -d = -f 1)"
 	DTB_AOSCNAME="$(echo $i | cut -d = -f 2)"
-	mkdir -p $OUT_DIR/dtb-$DTB_AOSCNAME
-	cp $LINUX_DIR/arch/arm/boot/dts/$DTB_CNAME.dtb $OUT_DIR/dtb-$DTB_AOSCNAME/dtb.dtb
+	mkdir -p "$OUT_DIR"/dtb-"$DTB_AOSCNAME"
+	cp "$LINUX_DIR"/arch/arm/boot/dts/"$DTB_CNAME".dtb "$OUT_DIR"/dtb-"$DTB_AOSCNAME"/dtb.dtb
 	echo "Copied dtb for $DTB_AOSCNAME"
 done
