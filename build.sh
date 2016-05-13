@@ -90,7 +90,7 @@ fi
 echo "Building DTBs..."
 
 [ "$BUILD_DTB" != "0" ] &&
-for i in "$DTB_TARGETS"
+for i in $DTB_TARGETS
 do
 	DTB_CNAME="$(echo $i | cut -d = -f 1)"
 	DTB_AOSCNAME="$(echo $i | cut -d = -f 2)"
