@@ -48,8 +48,16 @@ echo "Building linux..."
 
 if [ "$BUILD_LINUX" != "0" ]; then
 	echo "Building linux for KVM-enabled sunxi CPUs..."
-	tar xf $LINUX_SRC
-	pushd $LINUX_DIR
+	if [ ! -d $LINUX_DIR ]; then
+		tar xf $LINUX_SRC
+		pushd $LINUX_DIR
+		for i in ../patches/linux/*
+		do
+			patch -Np1 -i $i
+		done
+	else
+		pushd $LINUX_DIR
+	fi
 	mkdir -p $LOG_DIR/linux-sunxi-kvm
 	cp ../sunxi-kvm-config .config
 	echo "Configured"
@@ -60,6 +68,19 @@ if [ "$BUILD_LINUX" != "0" ]; then
 	mkdir -p $OUT_DIR/linux-sunxi-kvm
 	cp arch/arm/boot/zImage $OUT_DIR/linux-sunxi-kvm/
 	cp -r $TMPDIR/lib/modules/ $OUT_DIR/linux-sunxi-kvm/
+	rm -r $TMPDIR
+	echo "Copied"
+	echo "Building linux for KVM-disabled sunxi CPUs..."
+	mkdir -p $LOG_DIR/linux-sunxi-nokvm
+	cp ../sunxi-nokvm-config .config
+	echo "Configured"
+	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- -j5 > $LOG_DIR/linux-sunxi-nokvm/build.log 2>&1
+	echo "Built"
+	TMPDIR=$(mktemp -d)
+	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- INSTALL_MOD_PATH=$TMPDIR modules_install > $LOG_DIR/linux-sunxi-nokvm/modules_install.log 2>&1
+	mkdir -p $OUT_DIR/linux-sunxi-nokvm
+	cp arch/arm/boot/zImage $OUT_DIR/linux-sunxi-nokvm/
+	cp -r $TMPDIR/lib/modules/ $OUT_DIR/linux-sunxi-nokvm/
 	rm -r $TMPDIR
 	echo "Copied"
 	popd
