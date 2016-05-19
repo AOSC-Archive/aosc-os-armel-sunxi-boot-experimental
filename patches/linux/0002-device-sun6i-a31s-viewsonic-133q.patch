@@ -1,21 +1,6 @@
-diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index 95c1923..83070d1 100644
---- a/arch/arm/boot/dts/Makefile
-+++ b/arch/arm/boot/dts/Makefile
-@@ -677,6 +677,7 @@ dtb-$(CONFIG_MACH_SUN6I) += \
- 	sun6i-a31-mele-a1000g-quad.dtb \
- 	sun6i-a31s-cs908.dtb \
- 	sun6i-a31s-primo81.dtb \
-+	sun6i-a31s-viewsonic-133q.dtb \
- 	sun6i-a31s-sina31s.dtb \
- 	sun6i-a31s-sinovoip-bpi-m2.dtb \
- 	sun6i-a31s-yones-toptech-bs1078-v2.dtb
-diff --git a/arch/arm/boot/dts/sun6i-a31s-viewsonic-133q.dts b/arch/arm/boot/dts/sun6i-a31s-viewsonic-133q.dts
-new file mode 100644
-index 0000000..3894acf
---- /dev/null
-+++ b/arch/arm/boot/dts/sun6i-a31s-viewsonic-133q.dts
-@@ -0,0 +1,241 @@
+--- /dev/null	2016-05-16 00:10:17.416933122 +0800
++++ linux-4.6-rc7/arch/arm/boot/dts/sun6i-a31s-viewsonic-133q.dts	2016-05-19 11:53:23.393446126 +0800
+@@ -0,0 +1,264 @@
 +/*
 + * Copyright 2014 Siarhei Siamashka <siarhei.siamashka@gmail.com>
 + * Copyright 2015 Karsten Merker <merker@debian.org>
@@ -76,6 +61,11 @@ index 0000000..3894acf
 +
 +&cpu0 {
 +	cpu-supply = <&reg_dcdc3>;
++};
++
++&ehci0 {
++	/* rtl8723au wifi is connected here */
++	status = "okay";
 +};
 +
 +&lradc {
@@ -166,6 +156,13 @@ index 0000000..3894acf
 +		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
 +		allwinner,pull = <SUN4I_PINCTRL_PULL_UP>;
 +	};
++
++	usb0_id_detect_pin: usb0_id_detect_pin@0 {
++		allwinner,pins = "PA15";
++		allwinner,function = "gpio_in";
++		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
++		allwinner,pull = <SUN4I_PINCTRL_PULL_UP>;
++	};
 +};
 +
 +&p2wi {
@@ -176,6 +173,7 @@ index 0000000..3894acf
 +		reg = <0x68>;
 +		interrupt-parent = <&nmi_intc>;
 +		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
++		x-powers,drivebus;
 +	};
 +};
 +
@@ -244,16 +242,26 @@ index 0000000..3894acf
 +	regulator-name = "vddio-csi";
 +};
 +
++&reg_drivebus {
++	regulator-name = "usb0-vbus";
++	status = "okay";
++};
++
 +&simplefb_lcd {
 +	vcc-lcd-supply = <&reg_dc1sw>;
 +};
 +
 +&usb_otg {
-+	/* otg support requires support for AXP221 usb-power-supply and GPIO */
-+	dr_mode = "host";
++	dr_mode = "otg";
 +	status = "okay";
 +};
 +
 +&usbphy {
++	pinctrl-names = "default";
++	pinctrl-0 = <&usb0_id_detect_pin>;
++	usb0_id_det-gpio = <&pio 0 15 GPIO_ACTIVE_HIGH>; /* PA15 */
++	usb0_vbus_power-supply = <&usb_power_supply>;
++	usb0_vbus-supply = <&reg_drivebus>;
++	usb1_vbus-supply = <&reg_dldo1>;
 +	status = "okay";
 +};
