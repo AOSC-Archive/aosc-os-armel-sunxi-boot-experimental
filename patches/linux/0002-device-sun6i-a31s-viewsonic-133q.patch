@@ -1,3 +1,13 @@
+--- a/arch/arm/boot/dts/Makefile	2016-05-19 15:39:49.698041661 +0800
++++ b/arch/arm/boot/dts/Makefile	2016-05-19 15:39:29.934466569 +0800
+@@ -677,6 +677,7 @@
+ 	sun6i-a31-mele-a1000g-quad.dtb \
+ 	sun6i-a31s-cs908.dtb \
+ 	sun6i-a31s-primo81.dtb \
++	sun6i-a31s-viewsonic-133q.dtb \
+ 	sun6i-a31s-sina31s.dtb \
+ 	sun6i-a31s-sinovoip-bpi-m2.dtb \
+ 	sun6i-a31s-yones-toptech-bs1078-v2.dtb
 --- /dev/null	2016-05-16 00:10:17.416933122 +0800
 +++ linux-4.6-rc7/arch/arm/boot/dts/sun6i-a31s-viewsonic-133q.dts	2016-05-19 11:53:23.393446126 +0800
 @@ -0,0 +1,264 @@
