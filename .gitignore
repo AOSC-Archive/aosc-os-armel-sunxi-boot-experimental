@@ -2,3 +2,5 @@ linux-*
 u-boot-*
 out
 log
+out-*
+log-*
