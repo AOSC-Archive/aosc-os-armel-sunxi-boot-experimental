@@ -8,9 +8,9 @@
  	sun6i-a31s-sina31s.dtb \
  	sun6i-a31s-sinovoip-bpi-m2.dtb \
  	sun6i-a31s-yones-toptech-bs1078-v2.dtb
---- /dev/null	2016-05-16 00:10:17.416933122 +0800
-+++ linux-4.6-rc7/arch/arm/boot/dts/sun6i-a31s-viewsonic-133q.dts	2016-05-19 11:53:23.393446126 +0800
-@@ -0,0 +1,264 @@
+--- /dev/null	2016-06-04 13:33:21.690253630 +0800
++++ linux-4.6/arch/arm/boot/dts/sun6i-a31s-viewsonic-133q.dts	2016-06-05 11:26:43.379494342 +0800
+@@ -0,0 +1,268 @@
 +/*
 + * Copyright 2014 Siarhei Siamashka <siarhei.siamashka@gmail.com>
 + * Copyright 2015 Karsten Merker <merker@debian.org>
@@ -263,6 +263,10 @@
 +
 +&usb_otg {
 +	dr_mode = "otg";
++	status = "okay";
++};
++
++&usb_power_supply {
 +	status = "okay";
 +};
 +
