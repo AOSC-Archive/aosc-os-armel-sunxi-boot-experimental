@@ -22,8 +22,8 @@ index 83070d1..19e3bbb 100644
  	sun8i-a83t-allwinner-h8homlet-v2.dtb \
  	sun8i-a83t-cubietruck-plus.dtb \
 --- /dev/null	2016-06-11 20:10:27.146791726 +0800
-+++ b/arch/arm/boot/dts/sun8i-a33-aoson-m751s.dts	2016-06-12 22:51:37.395472856 +0800
-@@ -0,0 +1,191 @@
++++ b/arch/arm/boot/dts/sun8i-a33-aoson-m751s.dts	2016-06-13 17:34:54.909790864 +0800
+@@ -0,0 +1,185 @@
 +/*
 + * Copyright 2015 Hans de Goede <hdegoede@redhat.com>
 + *
@@ -73,19 +73,6 @@ index 83070d1..19e3bbb 100644
 +/ {
 +	model = "Aoson M751s Q8 A33 Tablet";
 +	compatible = "allwinner,q8-a33", "allwinner,sun8i-a33";
-+
-+	gsl_on: gsl_on {
-+		compatible = "regulator-fixed";
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&gsl1680_power_m751s>;
-+
-+		regulator-name = "gsl-on";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+		regulator-always-on;
-+		gpio = <&pio 7 1 GPIO_ACTIVE_HIGH>; /* PH1 */
-+		enable-active-high;
-+	};
 +
 +	/*
 +	 * This is actually an active-low reset line for the WLAN
@@ -155,14 +142,21 @@ index 83070d1..19e3bbb 100644
 +	pinctrl-0 = <&i2c0_pins_a>;
 +	status = "okay";
 +
++	/*
++	 * The gsl1680 is rated at 400KHz and it will not work reliable at
++	 * 100KHz, this has been confirmed on multiple different tablets.
++	 * The gsl1680 is the only device on this bus.
++	 */
++	clock-frequency = <400000>;
++
 +	ctp@40 {
 +		pinctrl-names = "default";
-+		pinctrl-0 = <&gsl1680_int_m751s>;
++		pinctrl-0 = <&gsl1680_power_m751s>, <&gsl1680_int_m751s>;
 +		compatible = "gsl1680";
 +		reg = <0x40>;
 +		interrupt-parent = <&pio>;
 +		interrupts = <1 5 IRQ_TYPE_LEVEL_HIGH>; /* PB5 */
-+		//power = <&pio 7 1>; /* PH1 */
++		power-gpios = <&pio 7 1 GPIO_ACTIVE_HIGH>; /* PH1 */
 +		touchscreen-inverted-y;
 +		touchscreen-size-x = <960>;
 +		touchscreen-size-y = <640>;
