@@ -93,11 +93,11 @@ index 9196c8a..7f12439c 100644
  
  	data->id_det_irq = gpiod_to_irq(data->id_det_gpio);
 -	data->vbus_det_irq = gpiod_to_irq(data->vbus_det_gpio);
--	if ((data->id_det_gpio && data->id_det_irq < 0) ||
--	    (data->vbus_det_gpio && data->vbus_det_irq < 0))
+-	if ((data->id_det_gpio && data->id_det_irq <= 0) ||
+-	    (data->vbus_det_gpio && data->vbus_det_irq <= 0))
 -		data->phy0_poll = true;
 -
- 	if (data->id_det_irq >= 0) {
+ 	if (data->id_det_irq > 0) {
  		ret = devm_request_irq(dev, data->id_det_irq,
  				sun4i_usb_phy0_id_vbus_det_irq,
 @@ -682,6 +695,7 @@ static int sun4i_usb_phy_probe(struct platform_device *pdev)
@@ -105,7 +105,7 @@ index 9196c8a..7f12439c 100644
  	}
  
 +	data->vbus_det_irq = gpiod_to_irq(data->vbus_det_gpio);
- 	if (data->vbus_det_irq >= 0) {
+ 	if (data->vbus_det_irq > 0) {
  		ret = devm_request_irq(dev, data->vbus_det_irq,
  				sun4i_usb_phy0_id_vbus_det_irq,
 @@ -733,7 +747,7 @@ static const struct sun4i_usb_phy_cfg sun5i_a13_cfg = {
