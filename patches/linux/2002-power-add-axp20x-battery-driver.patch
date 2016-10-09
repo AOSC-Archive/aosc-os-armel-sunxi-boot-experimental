@@ -1,25 +1,46 @@
-From 1ccdd9479d59a988bb6c54f1a033ed0b4ccff939 Mon Sep 17 00:00:00 2001
+From 130b45a6a55d2ab1d873cf2b5d26cdade16e769c Mon Sep 17 00:00:00 2001
 From: Icenowy Zheng <icenowy@aosc.xyz>
-Date: Fri, 1 Jul 2016 17:01:02 +0800
+Date: Fri, 7 Oct 2016 14:16:34 +0800
 Subject: [PATCH 2/4] power: add axp20x-battery driver
 
-This driver is the battery power supply driver of axp20x PMIC. Currently
-it supports only AXP22x variants.
+This driver is the battery power supply driver of axp20x PMIC.
+
+This driver currently contains only capacity and current properties (for
+axp20x only capacity is supported now) , however it's easy to implement more
+properties.
 
 Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
 ---
- drivers/mfd/axp20x.c           |  14 +++
+Backported to 4.8 by Icenowy for AOSC OS ARMEL sunxi boot.
+
+ drivers/mfd/axp20x.c                  |  28 ++++
  drivers/power/Makefile         |   1 +
- drivers/power/axp20x_battery.c | 254 +++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 269 insertions(+)
+ drivers/power/axp20x_battery.c | 277 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 306 insertions(+)
  create mode 100644 drivers/power/axp20x_battery.c
 
 diff --git a/drivers/mfd/axp20x.c b/drivers/mfd/axp20x.c
-index cee5288..064e5015 100644
+index 17877b2..ebccb22 100644
 --- a/drivers/mfd/axp20x.c
 +++ b/drivers/mfd/axp20x.c
-@@ -166,6 +166,15 @@ static struct resource axp22x_usb_power_supply_resources[] = {
- 	DEFINE_RES_IRQ_NAMED(AXP22X_IRQ_VBUS_REMOVAL, "VBUS_REMOVAL"),
+@@ -141,6 +141,15 @@ static struct resource axp20x_ac_power_supply_resources[] = {
+ 	DEFINE_RES_IRQ_NAMED(AXP20X_IRQ_ACIN_OVER_V, "ACIN_OVER_V"),
+ };
+ 
++static struct resource axp20x_battery_resources[] = {
++	DEFINE_RES_IRQ_NAMED(AXP20X_IRQ_BATT_PLUGIN, "BATT_PLUGIN"),
++	DEFINE_RES_IRQ_NAMED(AXP20X_IRQ_BATT_REMOVAL, "BATT_REMOVAL"),
++	DEFINE_RES_IRQ_NAMED(AXP20X_IRQ_BATT_ENT_ACT_MODE, "BATT_ENT_ACT_MODE"),
++	DEFINE_RES_IRQ_NAMED(AXP20X_IRQ_BATT_EXIT_ACT_MODE, "BATT_EXIT_ACT_MODE"),
++	DEFINE_RES_IRQ_NAMED(AXP20X_IRQ_CHARG, "CHARG"),
++	DEFINE_RES_IRQ_NAMED(AXP20X_IRQ_CHARG_DONE, "CHARG_DONE"),
++};
++
+ static struct resource axp20x_pek_resources[] = {
+ 	{
+ 		.name	= "PEK_DBR",
+@@ -162,6 +171,15 @@ static struct resource axp20x_usb_power_supply_resources[] = {
+ 	DEFINE_RES_IRQ_NAMED(AXP20X_IRQ_VBUS_NOT_VALID, "VBUS_NOT_VALID"),
  };
  
 +static struct resource axp22x_battery_resources[] = {
@@ -31,39 +52,51 @@ index cee5288..064e5015 100644
 +	DEFINE_RES_IRQ_NAMED(AXP22X_IRQ_CHARG_DONE, "CHARG_DONE"),
 +};
 +
- static struct resource axp22x_pek_resources[] = {
- 	{
- 		.name   = "PEK_DBR",
-@@ -538,6 +547,11 @@ static struct mfd_cell axp22x_cells[] = {
- 		.of_compatible	= "x-powers,axp202-usb-power-supply",
- 		.num_resources	= ARRAY_SIZE(axp22x_usb_power_supply_resources),
- 		.resources	= axp22x_usb_power_supply_resources,
-+	}, {
+ static struct resource axp22x_usb_power_supply_resources[] = {
+ 	DEFINE_RES_IRQ_NAMED(AXP22X_IRQ_VBUS_PLUGIN, "VBUS_PLUGIN"),
+ 	DEFINE_RES_IRQ_NAMED(AXP22X_IRQ_VBUS_REMOVAL, "VBUS_REMOVAL"),
+@@ -520,6 +538,11 @@ static struct mfd_cell axp20x_cells[] = {
+ 		.num_resources	= ARRAY_SIZE(axp20x_ac_power_supply_resources),
+ 		.resources	= axp20x_ac_power_supply_resources,
+ 	}, {
 +		.name		= "axp20x-battery",
 +		.of_compatible	= "x-powers,axp202-battery",
++		.num_resources	= ARRAY_SIZE(axp20x_battery_resources),
++		.resources	= axp20x_battery_resources,
++	}, {
+ 		.name		= "axp20x-usb-power-supply",
+ 		.of_compatible	= "x-powers,axp202-usb-power-supply",
+ 		.num_resources	= ARRAY_SIZE(axp20x_usb_power_supply_resources),
+@@ -535,6 +558,11 @@ static struct mfd_cell axp22x_cells[] = {
+ 	}, {
+ 		.name			= "axp20x-regulator",
+ 	}, {
++		.name		= "axp20x-battery",
++		.of_compatible	= "x-powers,axp221-battery",
 +		.num_resources	= ARRAY_SIZE(axp22x_battery_resources),
 +		.resources	= axp22x_battery_resources,
- 	},
- };
- 
++	}, {
+ 		.name		= "axp20x-usb-power-supply",
+ 		.of_compatible	= "x-powers,axp221-usb-power-supply",
+ 		.num_resources	= ARRAY_SIZE(axp22x_usb_power_supply_resources),
 diff --git a/drivers/power/Makefile b/drivers/power/Makefile
-index e46b75d..1452d23 100644
+index 36c599d..01271d3 100644
 --- a/drivers/power/Makefile
 +++ b/drivers/power/Makefile
-@@ -10,6 +10,7 @@ obj-$(CONFIG_GENERIC_ADC_BATTERY)	+= generic-adc-battery.o
+@@ -9,6 +9,7 @@ obj-$(CONFIG_GENERIC_ADC_BATTERY)	+= generic-adc-battery.o
+ 
  obj-$(CONFIG_PDA_POWER)		+= pda_power.o
  obj-$(CONFIG_APM_POWER)		+= apm_power.o
- obj-$(CONFIG_AXP20X_POWER)	+= axp20x_usb_power.o
 +obj-$(CONFIG_AXP20X_POWER)	+= axp20x_battery.o
+ obj-$(CONFIG_AXP20X_POWER)	+= axp20x_usb_power.o
  obj-$(CONFIG_MAX8925_POWER)	+= max8925_power.o
  obj-$(CONFIG_WM831X_BACKUP)	+= wm831x_backup.o
- obj-$(CONFIG_WM831X_POWER)	+= wm831x_power.o
 diff --git a/drivers/power/axp20x_battery.c b/drivers/power/axp20x_battery.c
 new file mode 100644
-index 0000000..8fac2cd
+index 0000000..67ee58f
 --- /dev/null
 +++ b/drivers/power/axp20x_battery.c
-@@ -0,0 +1,254 @@
+@@ -0,0 +1,277 @@
 +/*
 + * AXP20x PMIC battery status driver
 + *
@@ -216,6 +249,21 @@ index 0000000..8fac2cd
 +	return 0;
 +}
 +
++static enum power_supply_property axp20x_battery_properties[] = {
++	POWER_SUPPLY_PROP_CAPACITY,
++	POWER_SUPPLY_PROP_HEALTH,
++	POWER_SUPPLY_PROP_PRESENT,
++	POWER_SUPPLY_PROP_STATUS,
++};
++
++static const struct power_supply_desc axp20x_battery_desc = {
++	.name = "axp20x-battery",
++	.type = POWER_SUPPLY_TYPE_BATTERY,
++	.properties = axp20x_battery_properties,
++	.num_properties = ARRAY_SIZE(axp20x_battery_properties),
++	.get_property = axp20x_battery_get_property,
++};
++
 +static enum power_supply_property axp22x_battery_properties[] = {
 +	POWER_SUPPLY_PROP_CAPACITY,
 +	POWER_SUPPLY_PROP_HEALTH,
@@ -238,6 +286,9 @@ index 0000000..8fac2cd
 +	struct axp20x_dev *axp20x = dev_get_drvdata(pdev->dev.parent);
 +	struct power_supply_config psy_cfg = {};
 +	struct axp20x_battery *power;
++	static const char * const axp20x_irq_names[] = {
++		"BATT_PLUGIN", "BATT_REMOVAL", "BATT_ENT_ACT_MODE",
++		"BATT_EXIT_ACT_MODE", "CHARG", "CHARG_DONE", NULL };
 +	static const char * const axp22x_irq_names[] = {
 +		"BATT_PLUGIN", "BATT_REMOVAL", "BATT_ENT_ACT_MODE",
 +		"BATT_EXIT_ACT_MODE", "CHARG", "CHARG_DONE", NULL };
@@ -261,6 +312,11 @@ index 0000000..8fac2cd
 +	power->regmap = axp20x->regmap;
 +
 +	switch (power->axp20x->variant) {
++	case AXP202_ID:
++	case AXP209_ID:
++		battery_desc = &axp20x_battery_desc;
++		irq_names = axp20x_irq_names;
++		break;
 +	case AXP221_ID:
 +	case AXP223_ID:
 +		battery_desc = &axp22x_battery_desc;
@@ -319,5 +375,5 @@ index 0000000..8fac2cd
 +MODULE_DESCRIPTION("AXP20x PMIC battery status driver");
 +MODULE_LICENSE("GPL");
 -- 
-2.9.0
+2.10.1
 
