@@ -1,0 +1,21 @@
+[PATCH] ARM: sun8i-h3: dt: enable sun8i-ce on orangepi one
+
+Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
+---
+ arch/arm/boot/dts/sun8i-h3-orangepi-one.dts | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm/boot/dts/sun8i-h3-orangepi-one.dts b/arch/arm/boot/dts/sun8i-h3-orangepi-one.dts
+index 71717cc..a6cf6b1 100644
+--- a/arch/arm/boot/dts/sun8i-h3-orangepi-one.dts
++++ b/arch/arm/boot/dts/sun8i-h3-orangepi-one.dts
+@@ -173,3 +173,7 @@
+ 	allwinner,leds-active-low;
+ 	status = "okay";
+ };
++
++&crypto {
++	status = "okay";
++};
+
+&mmc0 {
