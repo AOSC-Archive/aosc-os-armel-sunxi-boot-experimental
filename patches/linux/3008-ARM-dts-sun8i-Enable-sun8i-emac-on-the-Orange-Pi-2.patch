@@ -7,6 +7,8 @@ index f93f5d1..5608eb4 100644
  	aliases {
  		serial0 = &uart0;
 +		ethernet0 = &emac;
+		/* ethernet0 is the H3 emac, defined in sun8i-h3.dtsi */
+		ethernet1 = &rtl8189;
  	};
  
  	chosen {

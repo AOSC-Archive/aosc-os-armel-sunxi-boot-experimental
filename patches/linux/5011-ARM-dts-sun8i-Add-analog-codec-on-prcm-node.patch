@@ -1,0 +1,38 @@
+From aadc877d8c7a572f43f9125ac695c8cf11ec68b4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Myl=C3=A8ne=20Josserand?=
+ <mylene.josserand@free-electrons.com>
+Date: Tue, 4 Oct 2016 11:46:24 +0200
+Subject: [PATCH 11/15] ARM: dts: sun8i: Add analog codec on prcm node
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The analog codec for sun8i used PRCM registers so it should be added
+in the device tree as a subnode of the prcm entry.
+
+Signed-off-by: Mylène Josserand <mylene.josserand@free-electrons.com>
+---
+ arch/arm/boot/dts/sun8i-a23-a33.dtsi | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/arch/arm/boot/dts/sun8i-a23-a33.dtsi b/arch/arm/boot/dts/sun8i-a23-a33.dtsi
+index 48fc24f..5197812 100644
+--- a/arch/arm/boot/dts/sun8i-a23-a33.dtsi
++++ b/arch/arm/boot/dts/sun8i-a23-a33.dtsi
+@@ -549,6 +549,13 @@
+ 				compatible = "allwinner,sun6i-a31-clock-reset";
+ 				#reset-cells = <1>;
+ 			};
++
++			codec_analog: codec_analog {
++				compatible = "allwinner,sun8i-codec-analog";
++				interrupts = <GIC_SPI 29 IRQ_TYPE_LEVEL_HIGH>;
++				clocks = <&ccu CLK_BUS_CODEC>, <&ccu CLK_AC_DIG>;
++				clock-names = "apb", "codec";
++			};
+ 		};
+ 
+ 		cpucfg@01f01c00 {
+-- 
+2.10.2
+

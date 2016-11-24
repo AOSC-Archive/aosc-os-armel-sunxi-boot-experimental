@@ -14,10 +14,10 @@ Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
 Backported to 4.8 by Icenowy for AOSC OS ARMEL sunxi boot.
 
  drivers/mfd/axp20x.c                  |  28 ++++
- drivers/power/Makefile         |   1 +
- drivers/power/axp20x_battery.c | 277 ++++++++++++++++++++++++++++++++++
+ drivers/power/supply/Makefile         |   1 +
+ drivers/power/supply/axp20x_battery.c | 277 ++++++++++++++++++++++++++++++++++
  3 files changed, 306 insertions(+)
- create mode 100644 drivers/power/axp20x_battery.c
+ create mode 100644 drivers/power/supply/axp20x_battery.c
 
 diff --git a/drivers/mfd/axp20x.c b/drivers/mfd/axp20x.c
 index 17877b2..ebccb22 100644
@@ -79,10 +79,10 @@ index 17877b2..ebccb22 100644
  		.name		= "axp20x-usb-power-supply",
  		.of_compatible	= "x-powers,axp221-usb-power-supply",
  		.num_resources	= ARRAY_SIZE(axp22x_usb_power_supply_resources),
-diff --git a/drivers/power/Makefile b/drivers/power/Makefile
+diff --git a/drivers/power/supply/Makefile b/drivers/power/supply/Makefile
 index 36c599d..01271d3 100644
---- a/drivers/power/Makefile
-+++ b/drivers/power/Makefile
+--- a/drivers/power/supply/Makefile
++++ b/drivers/power/supply/Makefile
 @@ -9,6 +9,7 @@ obj-$(CONFIG_GENERIC_ADC_BATTERY)	+= generic-adc-battery.o
  
  obj-$(CONFIG_PDA_POWER)		+= pda_power.o
@@ -91,11 +91,11 @@ index 36c599d..01271d3 100644
  obj-$(CONFIG_AXP20X_POWER)	+= axp20x_usb_power.o
  obj-$(CONFIG_MAX8925_POWER)	+= max8925_power.o
  obj-$(CONFIG_WM831X_BACKUP)	+= wm831x_backup.o
-diff --git a/drivers/power/axp20x_battery.c b/drivers/power/axp20x_battery.c
+diff --git a/drivers/power/supply/axp20x_battery.c b/drivers/power/supply/axp20x_battery.c
 new file mode 100644
 index 0000000..67ee58f
 --- /dev/null
-+++ b/drivers/power/axp20x_battery.c
++++ b/drivers/power/supply/axp20x_battery.c
 @@ -0,0 +1,277 @@
 +/*
 + * AXP20x PMIC battery status driver

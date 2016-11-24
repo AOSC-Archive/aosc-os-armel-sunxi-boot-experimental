@@ -1,0 +1,38 @@
+From db0a1fcbe11c047c7c0cc9baf9f3fb8fe97701c7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Myl=C3=A8ne=20Josserand?=
+ <mylene.josserand@free-electrons.com>
+Date: Tue, 4 Oct 2016 11:46:27 +0200
+Subject: [PATCH 14/15] ARM: dts: sun8i: sinlinx: Enable audio nodes
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Enable the audio codec and the audio dai for the sun8i A33 sinlinx board.
+
+Signed-off-by: Mylène Josserand <mylene.josserand@free-electrons.com>
+---
+ arch/arm/boot/dts/sun8i-a33-sinlinx-sina33.dts | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm/boot/dts/sun8i-a33-sinlinx-sina33.dts b/arch/arm/boot/dts/sun8i-a33-sinlinx-sina33.dts
+index fef6abc..b03ca5e 100644
+--- a/arch/arm/boot/dts/sun8i-a33-sinlinx-sina33.dts
++++ b/arch/arm/boot/dts/sun8i-a33-sinlinx-sina33.dts
+@@ -63,6 +63,14 @@
+ 	};
+ };
+ 
++&codec {
++	status = "okay";
++};
++
++&dai {
++	status = "okay";
++};
++
+ &ehci0 {
+ 	status = "okay";
+ };
+-- 
+2.10.2
+
