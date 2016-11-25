@@ -53,15 +53,13 @@ index 75a8654..3bce639 100644
  		mmc0: mmc@01c0f000 {
  			compatible = "allwinner,sun7i-a20-mmc";
  			reg = <0x01c0f000 0x1000>;
-@@ -314,6 +341,11 @@
+@@ -314,6 +341,9 @@
  			clock-names = "hosc", "losc";
  			#clock-cells = <1>;
  			#reset-cells = <1>;
 +
-+			assigned-clocks = <&ccu CLK_PLL_DE>,
-+					  <&ccu CLK_DE>;
-+			assigned-clock-rates =  <864000000>,
-+						<432000000>;
++			assigned-clocks = <&ccu CLK_DE>;
++			assigned-clock-rates =  <432000000>;
  		};
  
  		pio: pinctrl@01c20800 {
