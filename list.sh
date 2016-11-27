@@ -27,12 +27,17 @@ Sinovoip_BPI_M3=sun8i-a83t-bananapi-m3
 
 orangepi_2=sun8i-h3-orangepi-2
 orangepi_one=sun8i-h3-orangepi-one
+orangepi_lite=sun8i-h3-orangepi-lite
 orangepi_pc=sun8i-h3-orangepi-pc
+orangepi_pc_plus=sun8i-h3-orangepi-pc-plus
 orangepi_plus=sun8i-h3-orangepi-plus
+orangepi_plus2e=sun8i-h3-orangepi-plus2e
+nanopi_neo=sun8i-h3-nanopi-neo
 
 q8_a13_tablet=sun5i-a13-q8
 q8_a23_tablet_800x480=sun8i-a23-q8
 q8_a33_tablet_800x480=sun8i-a33-q8
+q8_a33_tablet-1024x600=sun8i-a33-q8-1024x600
 "
 DTB_TARGETS="
 sun4i-a10-cubieboard=sun4i-a10-cubieboard
@@ -63,10 +68,15 @@ sun8i-a83t-cubietruck-plus=sun8i-a83t-cubietruck-plus
 sun8i-h3-bananapi-m2-plus=sun8i-h3-bananapi-m2-plus
 sun8i-h3-orangepi-2=sun8i-h3-orangepi-2
 sun8i-h3-orangepi-one=sun8i-h3-orangepi-one
+sun8i-h3-orangepi-lite=sun8i-h3-orangepi-lite
 sun8i-h3-orangepi-pc=sun8i-h3-orangepi-pc
+sun8i-h3-orangepi-pc-plus=sun8i-h3-orangepi-pc-plus
 sun8i-h3-orangepi-plus=sun8i-h3-orangepi-plus
+sun8i-h3-orangepi-plus2e=sun8i-h3-orangepi-plus2e
+sun8i-h3-nanopi-neo=sun8i-h3-nanopi-neo
 
 sun5i-a13-q8-tablet=sun5i-a13-q8
 sun8i-a23-q8-tablet=sun8i-a23-q8
 sun8i-a33-q8-tablet=sun8i-a33-q8
+sun8i-a33-q8-tablet=sun8i-a33-q8-1024x600
 "
