@@ -7,7 +7,6 @@ index 0adf932..25f2455 100644
  	aliases {
  		serial0 = &uart0;
 +		ethernet0 = &emac;
-		lcd0 = &lcd0;
  	};
  
  	chosen {

@@ -1,0 +1,133 @@
+From a90554ac102de3ad9a236592c53f7cf5cdb5b856 Mon Sep 17 00:00:00 2001
+From: Icenowy Zheng <icenowy@aosc.xyz>
+Date: Mon, 28 Nov 2016 04:21:56 +0800
+Subject: [PATCH 4/5] sunxi: video: use a dedicated config to indicate DE2
+
+Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
+---
+ arch/arm/include/asm/arch-sunxi/clock_sun6i.h | 8 ++++----
+ arch/arm/include/asm/arch-sunxi/cpu_sun4i.h   | 4 ++--
+ arch/arm/mach-sunxi/clock_sun6i.c             | 2 +-
+ board/sunxi/Kconfig                           | 2 +-
+ include/configs/sun8i.h                       | 4 ++++
+ scripts/config_whitelist.txt                  | 1 +
+ 6 files changed, 13 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/include/asm/arch-sunxi/clock_sun6i.h b/arch/arm/include/asm/arch-sunxi/clock_sun6i.h
+index a414f69..02d4a8c 100644
+--- a/arch/arm/include/asm/arch-sunxi/clock_sun6i.h
++++ b/arch/arm/include/asm/arch-sunxi/clock_sun6i.h
+@@ -67,7 +67,7 @@ struct sunxi_ccm_reg {
+ 	u32 dram_pll_cfg;	/* 0xf8 PLL_DDR cfg register, A33 only */
+ 	u32 mbus_reset;		/* 0xfc MBUS reset control, A33 only */
+ 	u32 dram_clk_gate;	/* 0x100 DRAM module gating */
+-#ifdef CONFIG_MACH_SUN8I
++#ifdef CONFIG_SUNXI_DE2
+ 	u32 de_clk_cfg;		/* 0x104 DE module clock */
+ #else
+ 	u32 be0_clk_cfg;	/* 0x104 BE0 module clock */
+@@ -76,7 +76,7 @@ struct sunxi_ccm_reg {
+ 	u32 fe0_clk_cfg;	/* 0x10c FE0 module clock */
+ 	u32 fe1_clk_cfg;	/* 0x110 FE1 module clock */
+ 	u32 mp_clk_cfg;		/* 0x114 MP module clock */
+-#ifdef CONFIG_MACH_SUN8I
++#ifdef CONFIG_SUNXI_DE2
+ 	u32 tcon0_clk_cfg;	/* 0x118 TCON0 module clock */
+ #else
+ 	u32 lcd0_ch0_clk_cfg;	/* 0x118 LCD0 CH0 module clock */
+@@ -93,7 +93,7 @@ struct sunxi_ccm_reg {
+ 	u32 dmic_clk_cfg;	/* 0x148 Digital Mic module clock*/
+ 	u32 reserved15;
+ 	u32 hdmi_clk_cfg;	/* 0x150 HDMI module clock */
+-#ifdef CONFIG_MACH_SUN8I
++#ifdef CONFIG_SUNXI_DE2
+ 	u32 hdmi_slow_clk_cfg;	/* 0x154 HDMI slow module clock */
+ #else
+ 	u32 ps_clk_cfg;		/* 0x154 PS module clock */
+@@ -440,7 +440,7 @@ struct sunxi_ccm_reg {
+ 
+ /* CCM bits common to all Display Engine (and IEP) clock ctrl regs */
+ #define CCM_DE_CTRL_M(n)		((((n) - 1) & 0xf) << 0)
+-#ifndef CONFIG_MACH_SUN8I
++#ifndef CONFIG_SUNXI_DE2
+ #define CCM_DE_CTRL_PLL_MASK		(0xf << 24)
+ #define CCM_DE_CTRL_PLL3		(0 << 24)
+ #define CCM_DE_CTRL_PLL7		(1 << 24)
+diff --git a/arch/arm/include/asm/arch-sunxi/cpu_sun4i.h b/arch/arm/include/asm/arch-sunxi/cpu_sun4i.h
+index 9758a14..f336b97 100644
+--- a/arch/arm/include/asm/arch-sunxi/cpu_sun4i.h
++++ b/arch/arm/include/asm/arch-sunxi/cpu_sun4i.h
+@@ -46,7 +46,7 @@
+ #define SUNXI_USB1_BASE			0x01c14000
+ #endif
+ #define SUNXI_SS_BASE			0x01c15000
+-#ifndef CONFIG_MACH_SUN8I_H3
++#ifndef CONFIG_SUNXI_DE2
+ #define SUNXI_HDMI_BASE			0x01c16000
+ #endif
+ #define SUNXI_SPI2_BASE			0x01c17000
+@@ -165,7 +165,7 @@ defined(CONFIG_MACH_SUN50I)
+ #define SUNXI_MP_BASE			0x01e80000
+ #define SUNXI_AVG_BASE			0x01ea0000
+ 
+-#ifdef CONFIG_MACH_SUN8I_H3
++#ifdef CONFIG_SUNXI_DE2
+ #define SUNXI_HDMI_BASE			0x01ee0000
+ #endif
+ 
+diff --git a/arch/arm/mach-sunxi/clock_sun6i.c b/arch/arm/mach-sunxi/clock_sun6i.c
+index bcf9aa1..3a81e9d 100644
+--- a/arch/arm/mach-sunxi/clock_sun6i.c
++++ b/arch/arm/mach-sunxi/clock_sun6i.c
+@@ -295,7 +295,7 @@ unsigned int clock_get_mipi_pll(void)
+ 	return ((src / 1000) * n * k / m) * 1000;
+ }
+ 
+-#ifndef CONFIG_MACH_SUN8I
++#ifndef CONFIG_SUNXI_DE2
+ void clock_set_de_mod_clock(u32 *clk_cfg, unsigned int hz)
+ {
+ 	int pll = clock_get_pll6() * 2;
+diff --git a/board/sunxi/Kconfig b/board/sunxi/Kconfig
+index 77fdc8f..4fed7e3 100644
+--- a/board/sunxi/Kconfig
++++ b/board/sunxi/Kconfig
+@@ -467,7 +467,7 @@ config VIDEO
+ 
+ config VIDEO_HDMI
+ 	bool "HDMI output support"
+-	depends on VIDEO
++	depends on VIDEO && !MACH_SUN8I_A23 && !MACH_SUN8I_A33
+ 	default y
+ 	---help---
+ 	Say Y here to add support for outputting video over HDMI.
+diff --git a/include/configs/sun8i.h b/include/configs/sun8i.h
+index 011d70f..c4eb3ba 100644
+--- a/include/configs/sun8i.h
++++ b/include/configs/sun8i.h
+@@ -26,6 +26,10 @@
+ 	#define CONFIG_SUNXI_USB_PHYS	2
+ #endif
+ 
++#if defined(CONFIG_MACH_SUN8I_H3)
++	#define CONFIG_SUNXI_DE2	1
++#endif
++
+ /*
+  * Include common sunxi configuration where most the settings are
+  */
+diff --git a/scripts/config_whitelist.txt b/scripts/config_whitelist.txt
+index be8850ae..abb6d55 100644
+--- a/scripts/config_whitelist.txt
++++ b/scripts/config_whitelist.txt
+@@ -4357,6 +4357,7 @@ CONFIG_ST_SMI
+ CONFIG_SUN4
+ CONFIG_SUNXI
+ CONFIG_SUNXI_AHCI
++CONFIG_SUNXI_DE2
+ CONFIG_SUNXI_EMAC
+ CONFIG_SUNXI_GMAC
+ CONFIG_SUNXI_GPIO
+-- 
+2.10.2
+

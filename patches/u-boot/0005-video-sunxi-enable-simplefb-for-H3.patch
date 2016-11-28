@@ -1,0 +1,111 @@
+From 6c842295e578666bee8c97e7082de298771cc309 Mon Sep 17 00:00:00 2001
+From: Icenowy Zheng <icenowy@aosc.xyz>
+Date: Mon, 28 Nov 2016 17:00:20 +0800
+Subject: [PATCH 5/5] video: sunxi: enable simplefb for H3
+
+As the DRM driver of H3 is not still merged into upstream Linux kernel,
+add a simplefb now in order to use HDMI in Linux.
+
+The display pipeline is slightly changed, to suite the display engine
+2.0.
+
+Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
+---
+ drivers/video/sunxi_display2.c | 61 ++++++++++++++++++++++++++++++++++++++++++
+ include/configs/sunxi-common.h |  3 +--
+ 2 files changed, 62 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/video/sunxi_display2.c b/drivers/video/sunxi_display2.c
+index cecaeb4..a80ac2a 100644
+--- a/drivers/video/sunxi_display2.c
++++ b/drivers/video/sunxi_display2.c
+@@ -25,6 +25,7 @@
+ #include <asm/global_data.h>
+ #include <asm/io.h>
+ #include <errno.h>
++#include <fdt_support.h>
+ #include <video_fb.h>
+ #include "videomodes.h"
+ 
+@@ -939,3 +940,63 @@ void *video_hw_init(void)
+ 
+ 	return graphic_device;
+ }
++
++/*
++ * Simplefb support.
++ */
++#if defined(CONFIG_OF_BOARD_SETUP) && defined(CONFIG_VIDEO_DT_SIMPLEFB)
++int sunxi_simplefb_setup(void *blob)
++{
++	static GraphicDevice *graphic_device = &sunxi_display.graphic_device;
++	int offset, ret;
++	u64 start, size;
++	const char *pipeline = NULL;
++
++	switch (sunxi_display.monitor) {
++	case sunxi_monitor_none:
++		return 0;
++	case sunxi_monitor_dvi:
++	case sunxi_monitor_hdmi:
++		pipeline = "de0-lcd0-hdmi";
++		break;
++	}
++
++	/* Find a prefilled simpefb node, matching out pipeline config */
++	offset = fdt_node_offset_by_compatible(blob, -1,
++					       "allwinner,simple-framebuffer");
++	while (offset >= 0) {
++		ret = fdt_stringlist_search(blob, offset, "allwinner,pipeline",
++					    pipeline);
++		if (ret == 0)
++			break;
++		offset = fdt_node_offset_by_compatible(blob, offset,
++					       "allwinner,simple-framebuffer");
++	}
++	if (offset < 0) {
++		eprintf("Cannot setup simplefb: node not found\n");
++		return 0; /* Keep older kernels working */
++	}
++
++	/*
++	 * Do not report the framebuffer as free RAM to the OS, note we cannot
++	 * use fdt_add_mem_rsv() here, because then it is still seen as RAM,
++	 * and e.g. Linux refuses to iomap RAM on ARM, see:
++	 * linux/arch/arm/mm/ioremap.c around line 301.
++	 */
++	start = gd->bd->bi_dram[0].start;
++	size = gd->bd->bi_dram[0].size - sunxi_display.fb_size;
++	ret = fdt_fixup_memory_banks(blob, &start, &size, 1);
++	if (ret) {
++		eprintf("Cannot setup simplefb: Error reserving memory\n");
++		return ret;
++	}
++
++	ret = fdt_setup_simplefb_node(blob, offset, sunxi_display.fb_addr,
++			graphic_device->winSizeX, graphic_device->winSizeY,
++			graphic_device->plnSizeX, "x8r8g8b8");
++	if (ret)
++		eprintf("Cannot setup simplefb: Error setting properties\n");
++
++	return ret;
++}
++#endif /* CONFIG_OF_BOARD_SETUP && CONFIG_VIDEO_DT_SIMPLEFB */
+diff --git a/include/configs/sunxi-common.h b/include/configs/sunxi-common.h
+index c6032aa..18b9b7a 100644
+--- a/include/configs/sunxi-common.h
++++ b/include/configs/sunxi-common.h
+@@ -284,9 +284,8 @@ extern int soft_i2c_gpio_scl;
+ #define CONFIG_SUNXI_MAX_FB_SIZE (16 << 20)
+ 
+ /* Do we want to initialize a simple FB? */
+-#ifndef CONFIG_MACH_SUN8I_H3
+ #define CONFIG_VIDEO_DT_SIMPLEFB
+-
++#ifndef CONFIG_MACH_SUN8I_H3
+ #define CONFIG_VIDEO_SUNXI
+ #else
+ #define CONFIG_VIDEO_SUNXI2
+-- 
+2.10.2
+

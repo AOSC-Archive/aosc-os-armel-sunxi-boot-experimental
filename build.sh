@@ -32,6 +32,10 @@ do
 	echo "Building u-boot for device $UBOOT_AOSCNAME..."
 	tar xf "$UBOOT_SRC"
 	pushd "$UBOOT_DIR"
+	for i in ../patches/u-boot/*
+	do
+		patch -Np1 -i $i
+	done
 	mkdir -p "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"
 	make "${UBOOT_CNAME}"_defconfig > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/config.log 2>&1
 	echo "Configured"
