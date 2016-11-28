@@ -37,7 +37,7 @@ nanopi_neo=sun8i-h3-nanopi-neo
 q8_a13_tablet=sun5i-a13-q8
 q8_a23_tablet_800x480=sun8i-a23-q8
 q8_a33_tablet_800x480=sun8i-a33-q8
-q8_a33_tablet-1024x600=sun8i-a33-q8-1024x600
+q8_a33_tablet_1024x600=sun8i-a33-q8-1024x600
 "
 DTB_TARGETS="
 sun4i-a10-cubieboard=sun4i-a10-cubieboard
