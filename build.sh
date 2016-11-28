@@ -30,6 +30,7 @@ do
 	UBOOT_CNAME="$(echo $i | cut -d = -f 1)"
 	UBOOT_AOSCNAME="$(echo $i | cut -d = -f 2)"
 	echo "Building u-boot for device $UBOOT_AOSCNAME..."
+	rm -rf "$UBOOT_DIR"
 	tar xf "$UBOOT_SRC"
 	pushd "$UBOOT_DIR"
 	for i in ../patches/u-boot/*
