@@ -40,7 +40,7 @@ do
 	mkdir -p "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"
 	make "${UBOOT_CNAME}"_defconfig > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/config.log 2>&1
 	echo "Configured"
-	make CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/build.log 2>&1
+	make CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- -j5 > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/build.log 2>&1
 	echo "Built"
 	mkdir -p "$OUT_DIR"/u-boot-"$UBOOT_AOSCNAME"/
 	cp u-boot-sunxi-with-spl.bin "$OUT_DIR"/u-boot-"$UBOOT_AOSCNAME"/
