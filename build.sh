@@ -24,6 +24,8 @@ mkdir -p "$OUT_DIR"
 
 LOG_DIR="${PWD}/log"
 mkdir -p "$LOG_DIR"
+mkdir -p "$LOG_DIR"/patches
+
 [ "$BUILD_UBOOT" != "0" ] &&
 for i in $UBOOT_TARGETS
 do
@@ -35,7 +37,7 @@ do
 	pushd "$UBOOT_DIR"
 	for i in ../patches/u-boot/*
 	do
-		patch -Np1 -i $i
+		patch -Np1 -i $i >> "$LOG_DIR"/patches/u-boot.log
 	done
 	mkdir -p "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"
 	make "${UBOOT_CNAME}"_defconfig > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/config.log 2>&1
@@ -58,7 +60,7 @@ if [ "$BUILD_LINUX" != "0" ]; then
 		pushd "$LINUX_DIR"
 		for i in ../patches/linux/*
 		do
-			patch -Np1 -i $i
+			patch -Np1 -i $i >> "$LOG_DIR"/patches/linux.log
 		done
 	else
 		pushd "$LINUX_DIR"
