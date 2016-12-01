@@ -73,6 +73,19 @@ if [ "$BUILD_LINUX" != "0" ]; then
 	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- INSTALL_MOD_PATH="$TMPDIR" modules_install > "$LOG_DIR"/linux-sunxi-nokvm/modules_install.log 2>&1
 	mkdir -p "$OUT_DIR"/linux-sunxi-nokvm
 	cp arch/arm/boot/zImage "$OUT_DIR"/linux-sunxi-nokvm/
+	EXTRA_KMOD_DIR="$(echo "$TMPDIR"/lib/modules/*)/kernel/extra"
+	mkdir -p "$EXTRA_KMOD_DIR"
+	for i in ../extra-kmod/*
+	do
+		export KDIR=$PWD ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi-
+		pushd $i
+		sh build.sh >> "$LOG_DIR"/linux-sunxi-nokvm/extra_kmod.log 2>&1
+		cp *.ko "$EXTRA_KMOD_DIR/"
+		popd
+		unset KDIR
+	done
+	depmod -b "$TMPDIR" $(basename $(readlink -f $EXTRA_KMOD_DIR/../..))
+	echo "Extra modules built"
 	cp -r "$TMPDIR"/lib/modules/ "$OUT_DIR"/linux-sunxi-nokvm/
 	rm -r "$TMPDIR"
 	echo "Copied"
