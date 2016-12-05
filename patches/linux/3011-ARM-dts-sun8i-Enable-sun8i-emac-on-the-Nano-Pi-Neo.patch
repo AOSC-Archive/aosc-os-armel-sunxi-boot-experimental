@@ -1,0 +1,21 @@
+diff --git a/arch/arm/boot/dts/sun8i-h3-nanopi-neo.dts b/arch/arm/boot/dts/sun8i-h3-nanopi-neo.dts
+index f93f5d1..5608eb4 100644
+--- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo.dts
++++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo.dts
+@@ -54,4 +54,5 @@
+ 
+ 	aliases {
+ 		serial0 = &uart0;
++		ethernet0 = &emac;
+ 	};
+ 
+ 	chosen {
+@@ -184,2 +185,8 @@
+ 	status = "okay";
+ };
++
++&emac {
++	phy-handle = <&int_mii_phy>;
++	phy-mode = "mii";
++	status = "okay";
++};
