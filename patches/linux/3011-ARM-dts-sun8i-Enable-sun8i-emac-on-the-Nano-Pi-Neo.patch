@@ -10,6 +10,8 @@ index f93f5d1..5608eb4 100644
  	};
  
  	chosen {
+--- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo.dts
++++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo.dts
 @@ -184,2 +185,8 @@
  	status = "okay";
  };
