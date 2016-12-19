@@ -33,7 +33,7 @@ new file mode 100644
 index 000000000000..d18807f73060
 --- /dev/null
 +++ b/arch/arm/boot/dts/sun8i-h2-plus-orangepi-zero.dts
-@@ -0,0 +1,159 @@
+@@ -0,0 +1,197 @@
 +/*
 + * Copyright (C) 2016 Icenowy Zheng <icenowy@aosc.xyz>
 + *
@@ -103,6 +103,8 @@ index 000000000000..d18807f73060
 +
 +	leds {
 +		compatible = "gpio-leds";
++               pinctrl-names = "default";
++               pinctrl-0 = <&leds_opi0>, <&leds_r_opi0>;
 +
 +		pwr_led {
 +			label = "orangepi:green:pwr";
@@ -116,19 +118,23 @@ index 000000000000..d18807f73060
 +		};
 +	};
 +
-+	reg_vcc_wifi: reg_vcc_wifi {
-+		compatible = "regulator-fixed";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+		regulator-name = "vcc-wifi";
-+		enable-active-high;
-+		gpio = <&pio 0 20 GPIO_ACTIVE_HIGH>;
-+	};
++       reg_vcc_wifi: reg_vcc_wifi {
++               compatible = "regulator-fixed";
++               pinctrl-names = "default";
++               pinctrl-0 = <&vcc_wifi_pin_opi0>;
++               regulator-min-microvolt = <3300000>;
++               regulator-max-microvolt = <3300000>;
++               regulator-name = "vcc-wifi";
++               enable-active-high;
++               gpio = <&pio 0 20 GPIO_ACTIVE_HIGH>;
++       };
 +
-+	wifi_pwrseq: wifi_pwrseq {
-+		compatible = "mmc-pwrseq-simple";
-+		reset-gpios = <&r_pio 0 7 GPIO_ACTIVE_LOW>;
-+	};
++       wifi_pwrseq: wifi_pwrseq {
++               compatible = "mmc-pwrseq-simple";
++               pinctrl-names = "default";
++               pinctrl-0 = <&wifi_pwrseq_pin_opi0>;
++               reset-gpios = <&r_pio 0 7 GPIO_ACTIVE_LOW>;
++       };
 +};
 +
 +&ehci1 {
@@ -164,11 +170,43 @@ index 000000000000..d18807f73060
 +};
 +
 +&mmc1_pins_a {
-+	bias-pull-up;
++       allwinner,pull = <SUN4I_PINCTRL_PULL_UP>;
 +};
 +
 +&ohci1 {
 +	status = "okay";
++};
++
++&pio {
++       leds_opi0: led_pins@0 {
++               allwinner,pins = "PA17";
++               allwinner,function = "gpio_out";
++               allwinner,drive = <SUN4I_PINCTRL_10_MA>;
++               allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
++       };
++
++       vcc_wifi_pin_opi0: vcc_wifi_pin@0 {
++               allwinner,pins = "PA20";
++               allwinner,function = "gpio_out";
++               allwinner,drive = <SUN4I_PINCTRL_10_MA>;
++               allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
++       };
++};
++
++&r_pio {
++       leds_r_opi0: led_pins@0 {
++               allwinner,pins = "PL10";
++               allwinner,function = "gpio_out";
++               allwinner,drive = <SUN4I_PINCTRL_10_MA>;
++               allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
++       };
++
++       wifi_pwrseq_pin_opi0: wifi_pwrseq_pin@0 {
++               allwinner,pins = "PL7";
++               allwinner,function = "gpio_out";
++               allwinner,drive = <SUN4I_PINCTRL_10_MA>;
++               allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
++       };
 +};
 +
 +&uart0 {
