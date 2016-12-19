@@ -25,6 +25,7 @@ Sinlinx_SinA33=sun8i-a33-sina33
 A33-OLinuXino=sun8i-a33-olinuxino
 Sinovoip_BPI_M3=sun8i-a83t-bananapi-m3
 
+orangepi_zero=sun8i-h2-plus-orangepi-zero
 orangepi_2=sun8i-h3-orangepi-2
 orangepi_one=sun8i-h3-orangepi-one
 orangepi_lite=sun8i-h3-orangepi-lite
@@ -66,6 +67,7 @@ sun8i-a33-sinlinx-sina33=sun8i-a33-sina33
 
 sun8i-a83t-cubietruck-plus=sun8i-a83t-cubietruck-plus
 sun8i-h3-bananapi-m2-plus=sun8i-h3-bananapi-m2-plus
+sun8i-h2-plus-orangepi-zero=sun8i-h2-plus-orangepi-zero
 sun8i-h3-orangepi-2=sun8i-h3-orangepi-2
 sun8i-h3-orangepi-one=sun8i-h3-orangepi-one
 sun8i-h3-orangepi-lite=sun8i-h3-orangepi-lite

@@ -1,0 +1,32 @@
+From 18a6d810d190c1596178633999c8c37ed1342dcf Mon Sep 17 00:00:00 2001
+From: Icenowy Zheng <icenowy@aosc.xyz>
+Date: Tue, 13 Dec 2016 23:22:49 +0800
+Subject: [PATCH 71/75] ARM: dts: sun8i: add a cpu0 label to cpu@0 node on
+ A23/33
+
+A "cpu0" label is needed on cpu@0 for cpufreq-dt to work.
+
+Add such a label, in order to prepare for cpufreq support of A23/33.
+
+Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
+Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+---
+ arch/arm/boot/dts/sun8i-a23-a33.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/sun8i-a23-a33.dtsi b/arch/arm/boot/dts/sun8i-a23-a33.dtsi
+index bc3e936edfcf..46bae51d2ba6 100644
+--- a/arch/arm/boot/dts/sun8i-a23-a33.dtsi
++++ b/arch/arm/boot/dts/sun8i-a23-a33.dtsi
+@@ -84,7 +84,7 @@
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 
+-		cpu@0 {
++		cpu0: cpu@0 {
+ 			compatible = "arm,cortex-a7";
+ 			device_type = "cpu";
+ 			reg = <0>;
+-- 
+2.11.0
+
