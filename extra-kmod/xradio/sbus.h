@@ -15,6 +15,7 @@
 
 #include <linux/version.h>
 #include <linux/module.h>
+#include <linux/if_ether.h>
 /*
  * sbus priv forward definition.
  * Implemented and instantiated in particular modules.
@@ -33,6 +34,7 @@ struct sbus_priv {
 	void                 *irq_priv;
 	wait_queue_head_t     init_wq;
 	int                   load_state;
+	char                  macaddr[ETH_ALEN];
 };
 
 struct sbus_ops {
@@ -53,7 +55,7 @@ struct sbus_ops {
 
 //sbus init functions
 struct device * sbus_sdio_init(struct sbus_ops  **sdio_ops, 
-                               struct sbus_priv **sdio_priv);
+                               struct sbus_priv **sdio_priv, char *macaddr);
 void  sbus_sdio_deinit(void);
 
 #endif /* __SBUS_H */

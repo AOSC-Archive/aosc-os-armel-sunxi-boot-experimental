@@ -216,6 +216,10 @@ static int sdio_set_clk(struct sdio_func *func, u32 clk)
 static int sdio_probe(struct sdio_func *func,
                       const struct sdio_device_id *id)
 {
+	struct device_node *np = func->dev.of_node;
+	const unsigned char *addr;
+	int len, i;
+
 	sbus_printk(XRADIO_DBG_ALWY, "XRadio Device:sdio clk=%d\n",
 	            func->card->host->ios.clock);
 	sbus_printk(XRADIO_DBG_NIY, "sdio func->class=%x\n", func->class);
@@ -244,6 +248,15 @@ static int sdio_probe(struct sdio_func *func,
 	sdio_self.func = func;
 	sdio_self.func->card->quirks |= MMC_QUIRK_BROKEN_BYTE_MODE_512;
 	sdio_set_drvdata(func, &sdio_self);
+	for (i = 0; i < ETH_ALEN; i++) sdio_self.macaddr[i] = 0x00;
+	if (np &&
+	   (addr = of_get_property(np, "local-mac-address", &len)) &&
+	   len == ETH_ALEN) {
+		memcpy(&sdio_self.macaddr, addr, ETH_ALEN);
+		xradio_dbg(XRADIO_DBG_NIY, "OFMAC=%02x:%02x:%02x:%02x:%02x:%02x\n",
+		           addr[0], addr[1], addr[2], 
+		           addr[3], addr[4], addr[5]);
+	}
 	sdio_claim_host(func);
 	sdio_enable_func(func);
 	sdio_release_host(func);
@@ -301,7 +314,7 @@ static struct sdio_driver sdio_driver = {
 
 /* Init Module function -> Called by insmod */
 struct device * sbus_sdio_init(struct sbus_ops  **sdio_ops, 
-                               struct sbus_priv **sdio_priv)
+                               struct sbus_priv **sdio_priv, char *macaddr)
 {
 	int ret = 0;
 	struct device * sdio_dev = NULL;
@@ -339,6 +352,9 @@ struct device * sbus_sdio_init(struct sbus_ops  **sdio_ops,
 	sdio_dev   = &(sdio_self.func->dev);
 	*sdio_ops  = &sdio_sbus_ops;
 	*sdio_priv = &sdio_self;
+
+	if (macaddr)
+		memcpy(macaddr, sdio_self.macaddr, ETH_ALEN);
 
 	return sdio_dev;
 }

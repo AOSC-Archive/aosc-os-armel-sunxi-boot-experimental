@@ -413,7 +413,7 @@ extern void wifi_hwaddr_from_chipid(u8 *addr);
  a[4] != 0 || a[5] != 0) && \
  !(a[0] & 0x3))
 
-static void xradio_get_mac_addrs(u8 *macaddr)
+static void xradio_get_mac_addrs(u8 *macaddr, const char *macaddr_sbus)
 {
 	int ret = 0;
 	SYS_BUG(!macaddr);
@@ -426,6 +426,15 @@ static void xradio_get_mac_addrs(u8 *macaddr)
 	}
 #endif
 
+	/* Then check the macaddr from sbus */
+	if(macaddr_sbus && (macaddr_sbus[0] || macaddr_sbus[1] || macaddr_sbus[2] ||
+			    macaddr_sbus[3] || macaddr_sbus[4] || macaddr_sbus[5])) {
+		memcpy(macaddr, macaddr_sbus, ETH_ALEN);
+		macaddr[0] &= 0xFC;
+		xradio_dbg(XRADIO_DBG_ALWY, "Use Mac addr from SBUS!\n");
+		ret = 0;
+	}
+
 #ifdef XRADIO_MACADDR_FROM_CHIPID
 	if (ret < 0 || !MACADDR_VAILID(macaddr)) {
 		wifi_hwaddr_from_chipid(macaddr);
@@ -436,9 +445,9 @@ static void xradio_get_mac_addrs(u8 *macaddr)
 	if (ret < 0 || !MACADDR_VAILID(macaddr)) {
 		get_random_bytes(macaddr, 6);
 		macaddr[0] &= 0xFC;
-		xradio_dbg(XRADIO_DBG_NIY, "Use random Mac addr!\n");
+		xradio_dbg(XRADIO_DBG_ALWY, "Use random Mac addr!\n");
 	}
-	xradio_dbg(XRADIO_DBG_NIY, "MACADDR=%02x:%02x:%02x:%02x:%02x:%02x\n",
+	xradio_dbg(XRADIO_DBG_ALWY, "MACADDR=%02x:%02x:%02x:%02x:%02x:%02x\n",
 	           macaddr[0], macaddr[1], macaddr[2], 
 	           macaddr[3], macaddr[4], macaddr[5]);
 }
@@ -509,7 +518,7 @@ static void xradio_set_ifce_comb(struct xradio_common *hw_priv,
 	hw->wiphy->n_iface_combinations = 3;
 }
 
-struct ieee80211_hw *xradio_init_common(size_t hw_priv_data_len)
+struct ieee80211_hw *xradio_init_common(size_t hw_priv_data_len, const char *macaddr)
 {
 	int i;
 	struct ieee80211_hw *hw;
@@ -528,7 +537,7 @@ struct ieee80211_hw *xradio_init_common(size_t hw_priv_data_len)
 	memset(hw_priv, 0, sizeof(*hw_priv));
 
 	/* Get MAC address. */
-	xradio_get_mac_addrs((u8 *)&hw_priv->addresses[0]);
+	xradio_get_mac_addrs((u8 *)&hw_priv->addresses[0], macaddr);
 	memcpy(hw_priv->addresses[1].addr, hw_priv->addresses[0].addr, ETH_ALEN);
 	hw_priv->addresses[1].addr[5] += 0x01;
 #ifdef P2P_MULTIVIF
@@ -902,7 +911,7 @@ int xradio_core_reinit(struct xradio_common *hw_priv)
 	sbus_sdio_deinit();
 	msleep(100);
 	hw_priv->pdev = sbus_sdio_init((struct sbus_ops **)&hw_priv->sbus_ops,
-	                               &hw_priv->sbus_priv);
+	                               &hw_priv->sbus_priv, NULL);
 	if (!hw_priv->pdev) {
 		xradio_dbg(XRADIO_DBG_ERROR,"%s:sbus_sdio_init failed\n", __func__);
 		ret = -ETIMEDOUT;
@@ -1020,24 +1029,31 @@ int xradio_core_init(void)
 		.power_mode = wsm_power_mode_quiescent,
 		.disableMoreFlagUsage = true,
 	};
+	const struct sbus_ops *temp_sbus_ops;
+	struct sbus_priv *temp_sbus_priv;
+	struct device *temp_pdev;
+	char macaddr[ETH_ALEN];
 	xradio_version_show();
 
+	//init sdio sbus
+	temp_pdev = sbus_sdio_init((struct sbus_ops **)&temp_sbus_ops,
+	                               &temp_sbus_priv, macaddr);
+	if (!temp_pdev) {
+		err = -ETIMEDOUT;
+		xradio_dbg(XRADIO_DBG_ERROR,"sbus_sdio_init failed\n");
+		goto err1;
+	}
+
 	//init xradio_common
-	dev = xradio_init_common(sizeof(struct xradio_common));
+	dev = xradio_init_common(sizeof(struct xradio_common), macaddr);
 	if (!dev) {
 		xradio_dbg(XRADIO_DBG_ERROR,"xradio_init_common failed\n");
 		return err;
 	}
 	hw_priv = dev->priv;
-
-	//init sdio sbus
-	hw_priv->pdev = sbus_sdio_init((struct sbus_ops **)&hw_priv->sbus_ops, 
-	                               &hw_priv->sbus_priv);
-	if (!hw_priv->pdev) {
-		err = -ETIMEDOUT;
-		xradio_dbg(XRADIO_DBG_ERROR,"sbus_sdio_init failed\n");
-		goto err1;
-	}
+	hw_priv->pdev = temp_pdev;
+	hw_priv->sbus_ops = temp_sbus_ops;
+	hw_priv->sbus_priv = temp_sbus_priv;
 
 	/* WSM callbacks. */
 	hw_priv->wsm_cbc.scan_complete = xradio_scan_complete_cb;
@@ -1118,9 +1134,9 @@ err4:
 err3:
 	xradio_pm_deinit(&hw_priv->pm_state);
 err2:
-	sbus_sdio_deinit();
-err1:
 	xradio_free_common(dev);
+err1:
+	sbus_sdio_deinit();
 	return err;
 }
 EXPORT_SYMBOL_GPL(xradio_core_init);
