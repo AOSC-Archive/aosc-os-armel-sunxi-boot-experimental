@@ -373,3 +373,5 @@ void sbus_sdio_deinit()
 		mdelay(10);
 	}
 }
+
+MODULE_DEVICE_TABLE(sdio, xradio_sdio_ids);
