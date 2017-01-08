@@ -42,7 +42,7 @@ do
 	mkdir -p "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"
 	make "${UBOOT_CNAME}"_defconfig > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/config.log 2>&1
 	echo "Configured"
-	make CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- -j5 > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/build.log 2>&1
+	make CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- -j5 > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/build.log 2>&1
 	echo "Built"
 	mkdir -p "$OUT_DIR"/u-boot-"$UBOOT_AOSCNAME"/
 	cp u-boot-sunxi-with-spl.bin "$OUT_DIR"/u-boot-"$UBOOT_AOSCNAME"/
@@ -69,17 +69,17 @@ if [ "$BUILD_LINUX" != "0" ]; then
 	cp ../sunxi-nokvm-config .config
 	echo "Configured"
 	# FIXME: hard coded parallel.
-	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- -j5 > "$LOG_DIR"/linux-sunxi-nokvm/build.log 2>&1
+	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- -j5 > "$LOG_DIR"/linux-sunxi-nokvm/build.log 2>&1
 	echo "Built"
 	TMPDIR=$(mktemp -d)
-	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- INSTALL_MOD_PATH="$TMPDIR" modules_install > "$LOG_DIR"/linux-sunxi-nokvm/modules_install.log 2>&1
+	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- INSTALL_MOD_PATH="$TMPDIR" modules_install > "$LOG_DIR"/linux-sunxi-nokvm/modules_install.log 2>&1
 	mkdir -p "$OUT_DIR"/linux-sunxi-nokvm
 	cp arch/arm/boot/zImage "$OUT_DIR"/linux-sunxi-nokvm/
 	EXTRA_KMOD_DIR="$(echo "$TMPDIR"/lib/modules/*)/kernel/extra"
 	mkdir -p "$EXTRA_KMOD_DIR"
 	for i in ../extra-kmod/*
 	do
-		export KDIR=$PWD ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi-
+		export KDIR=$PWD ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf-
 		pushd $i
 		sh build.sh >> "$LOG_DIR"/linux-sunxi-nokvm/extra_kmod.log 2>&1
 		cp *.ko "$EXTRA_KMOD_DIR/"
@@ -95,17 +95,17 @@ if [ "$BUILD_LINUX" != "0" ]; then
 	mkdir -p "$LOG_DIR"/linux-sunxi-kvm
 	cp ../sunxi-kvm-config .config
 	echo "Configured"
-	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- -j5 > "$LOG_DIR"/linux-sunxi-kvm/build.log 2>&1
+	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- -j5 > "$LOG_DIR"/linux-sunxi-kvm/build.log 2>&1
 	echo "Built"
 	TMPDIR=$(mktemp -d)
-	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi- INSTALL_MOD_PATH="$TMPDIR" modules_install > "$LOG_DIR"/linux-sunxi-kvm/modules_install.log 2>&1
+	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- INSTALL_MOD_PATH="$TMPDIR" modules_install > "$LOG_DIR"/linux-sunxi-kvm/modules_install.log 2>&1
 	mkdir -p "$OUT_DIR"/linux-sunxi-kvm
 	cp arch/arm/boot/zImage "$OUT_DIR"/linux-sunxi-kvm/
 	EXTRA_KMOD_DIR="$(echo "$TMPDIR"/lib/modules/*)/kernel/extra"
 	mkdir -p "$EXTRA_KMOD_DIR"
 	for i in ../extra-kmod/*
 	do
-		export KDIR=$PWD ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-hardfloat-linux-gnueabi-
+		export KDIR=$PWD ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf-
 		pushd $i
 		sh build.sh >> "$LOG_DIR"/linux-sunxi-kvm/extra_kmod.log 2>&1
 		cp *.ko "$EXTRA_KMOD_DIR/"
