@@ -42,7 +42,7 @@ do
 	mkdir -p "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"
 	make "${UBOOT_CNAME}"_defconfig > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/config.log 2>&1
 	echo "Configured"
-	make CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- -j5 > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/build.log 2>&1
+	make CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- -j$(nproc) > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/build.log 2>&1
 	echo "Built"
 	mkdir -p "$OUT_DIR"/u-boot-"$UBOOT_AOSCNAME"/
 	cp u-boot-sunxi-with-spl.bin "$OUT_DIR"/u-boot-"$UBOOT_AOSCNAME"/
@@ -69,7 +69,7 @@ if [ "$BUILD_LINUX" != "0" ]; then
 	cp ../sunxi-nokvm-config .config
 	echo "Configured"
 	# FIXME: hard coded parallel.
-	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- -j5 > "$LOG_DIR"/linux-sunxi-nokvm/build.log 2>&1
+	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- -j$(nproc) > "$LOG_DIR"/linux-sunxi-nokvm/build.log 2>&1
 	echo "Built"
 	TMPDIR=$(mktemp -d)
 	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- INSTALL_MOD_PATH="$TMPDIR" modules_install > "$LOG_DIR"/linux-sunxi-nokvm/modules_install.log 2>&1
@@ -95,7 +95,7 @@ if [ "$BUILD_LINUX" != "0" ]; then
 	mkdir -p "$LOG_DIR"/linux-sunxi-kvm
 	cp ../sunxi-kvm-config .config
 	echo "Configured"
-	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- -j5 > "$LOG_DIR"/linux-sunxi-kvm/build.log 2>&1
+	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- -j$(nproc) > "$LOG_DIR"/linux-sunxi-kvm/build.log 2>&1
 	echo "Built"
 	TMPDIR=$(mktemp -d)
 	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- INSTALL_MOD_PATH="$TMPDIR" modules_install > "$LOG_DIR"/linux-sunxi-kvm/modules_install.log 2>&1
