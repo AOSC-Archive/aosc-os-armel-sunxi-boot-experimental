@@ -1,3 +1,4 @@
+# FIXME: use a dedicated config for Banana Pi M2+ once ready
 UBOOT_TARGETS="
 Cubieboard=sun4i-a10-cubieboard
 Linksprite_pcDuino=sun4i-a10-pcduino
@@ -32,6 +33,7 @@ orangepi_lite=sun8i-h3-orangepi-lite
 orangepi_pc=sun8i-h3-orangepi-pc
 orangepi_pc_plus=sun8i-h3-orangepi-pc-plus
 orangepi_plus=sun8i-h3-orangepi-plus
+orangepi_plus=sun8i-h3-bananapi-m2-plus
 orangepi_plus2e=sun8i-h3-orangepi-plus2e
 nanopi_neo=sun8i-h3-nanopi-neo
 
