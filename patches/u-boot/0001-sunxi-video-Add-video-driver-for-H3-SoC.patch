@@ -1,4 +1,4 @@
-From b973987576822640f35dbb805a048b1706dc8e6d Mon Sep 17 00:00:00 2001
+From 3f25a9e20f51e3538d6301fd555e7152870ab810 Mon Sep 17 00:00:00 2001
 From: Jernej Skrabec <jernej.skrabec@siol.net>
 Date: Tue, 8 Nov 2016 01:04:32 +0100
 Subject: [PATCH 1/5] sunxi: video: Add video driver for H3 SoC
@@ -19,7 +19,7 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
  create mode 100644 drivers/video/sun8i_display.c
 
 diff --git a/arch/arm/include/asm/arch-sunxi/clock_sun6i.h b/arch/arm/include/asm/arch-sunxi/clock_sun6i.h
-index be9fcfd..a414f69 100644
+index 3f87672c62..854b1c06d9 100644
 --- a/arch/arm/include/asm/arch-sunxi/clock_sun6i.h
 +++ b/arch/arm/include/asm/arch-sunxi/clock_sun6i.h
 @@ -67,12 +67,20 @@ struct sunxi_ccm_reg {
@@ -84,7 +84,7 @@ index be9fcfd..a414f69 100644
  
  #define CCM_MMC_CTRL_M(x)		((x) - 1)
  #define CCM_MMC_CTRL_OCLK_DLY(x)	((x) << 8)
-@@ -346,6 +370,9 @@ struct sunxi_ccm_reg {
+@@ -347,6 +371,9 @@ struct sunxi_ccm_reg {
  #define CCM_LCD_CH0_CTRL_RST		0
  #define CCM_LCD_CH0_CTRL_GATE		(0x1 << 31)
  
@@ -94,7 +94,7 @@ index be9fcfd..a414f69 100644
  #define CCM_LCD_CH1_CTRL_M(n)		((((n) - 1) & 0xf) << 0)
  #define CCM_LCD_CH1_CTRL_HALF_SCLK1	0 /* no seperate sclk1 & 2 on sun6i */
  #define CCM_LCD_CH1_CTRL_PLL3		(0 << 24)
-@@ -355,6 +382,7 @@ struct sunxi_ccm_reg {
+@@ -356,6 +383,7 @@ struct sunxi_ccm_reg {
  #define CCM_LCD_CH1_CTRL_GATE		(0x1 << 31)
  
  #define CCM_HDMI_CTRL_M(n)		((((n) - 1) & 0xf) << 0)
@@ -102,7 +102,7 @@ index be9fcfd..a414f69 100644
  #define CCM_HDMI_CTRL_PLL_MASK		(3 << 24)
  #define CCM_HDMI_CTRL_PLL3		(0 << 24)
  #define CCM_HDMI_CTRL_PLL7		(1 << 24)
-@@ -363,6 +391,8 @@ struct sunxi_ccm_reg {
+@@ -364,6 +392,8 @@ struct sunxi_ccm_reg {
  #define CCM_HDMI_CTRL_DDC_GATE		(0x1 << 30)
  #define CCM_HDMI_CTRL_GATE		(0x1 << 31)
  
@@ -111,7 +111,7 @@ index be9fcfd..a414f69 100644
  #if defined(CONFIG_MACH_SUN50I)
  #define MBUS_CLK_DEFAULT		0x81000002 /* PLL6x2 / 3 */
  #elif defined(CONFIG_MACH_SUN8I)
-@@ -390,9 +420,13 @@ struct sunxi_ccm_reg {
+@@ -391,9 +421,13 @@ struct sunxi_ccm_reg {
  #define AHB_RESET_OFFSET_DRC0		25
  #define AHB_RESET_OFFSET_DE_FE0		14
  #define AHB_RESET_OFFSET_DE_BE0		12
@@ -125,7 +125,7 @@ index be9fcfd..a414f69 100644
  
  /* ahb_reset2 offsets */
  #define AHB_RESET_OFFSET_EPHY		2
-@@ -406,6 +440,7 @@ struct sunxi_ccm_reg {
+@@ -407,6 +441,7 @@ struct sunxi_ccm_reg {
  
  /* CCM bits common to all Display Engine (and IEP) clock ctrl regs */
  #define CCM_DE_CTRL_M(n)		((((n) - 1) & 0xf) << 0)
@@ -133,7 +133,7 @@ index be9fcfd..a414f69 100644
  #define CCM_DE_CTRL_PLL_MASK		(0xf << 24)
  #define CCM_DE_CTRL_PLL3		(0 << 24)
  #define CCM_DE_CTRL_PLL7		(1 << 24)
-@@ -413,6 +448,11 @@ struct sunxi_ccm_reg {
+@@ -414,6 +449,11 @@ struct sunxi_ccm_reg {
  #define CCM_DE_CTRL_PLL8		(3 << 24)
  #define CCM_DE_CTRL_PLL9		(4 << 24)
  #define CCM_DE_CTRL_PLL10		(5 << 24)
@@ -145,7 +145,7 @@ index be9fcfd..a414f69 100644
  #define CCM_DE_CTRL_GATE		(1 << 31)
  
  /* CCU security switch, H3 only */
-@@ -423,7 +463,9 @@ struct sunxi_ccm_reg {
+@@ -424,7 +464,9 @@ struct sunxi_ccm_reg {
  #ifndef __ASSEMBLY__
  void clock_set_pll1(unsigned int hz);
  void clock_set_pll3(unsigned int hz);
@@ -156,7 +156,7 @@ index be9fcfd..a414f69 100644
  void clock_set_mipi_pll(unsigned int hz);
  unsigned int clock_get_pll3(void);
 diff --git a/arch/arm/include/asm/arch-sunxi/cpu_sun4i.h b/arch/arm/include/asm/arch-sunxi/cpu_sun4i.h
-index 5f93830..9758a14 100644
+index 3c852224e6..24205907bd 100644
 --- a/arch/arm/include/asm/arch-sunxi/cpu_sun4i.h
 +++ b/arch/arm/include/asm/arch-sunxi/cpu_sun4i.h
 @@ -46,7 +46,9 @@
@@ -169,7 +169,7 @@ index 5f93830..9758a14 100644
  #define SUNXI_SPI2_BASE			0x01c17000
  #define SUNXI_SATA_BASE			0x01c18000
  #ifdef CONFIG_SUNXI_GEN_SUN4I
-@@ -163,6 +165,10 @@ defined(CONFIG_MACH_SUN50I)
+@@ -164,6 +166,10 @@ defined(CONFIG_MACH_SUN50I)
  #define SUNXI_MP_BASE			0x01e80000
  #define SUNXI_AVG_BASE			0x01ea0000
  
@@ -182,7 +182,7 @@ index 5f93830..9758a14 100644
  
 diff --git a/arch/arm/include/asm/arch-sunxi/display2.h b/arch/arm/include/asm/arch-sunxi/display2.h
 new file mode 100644
-index 0000000..755adeb
+index 0000000000..755adeb64f
 --- /dev/null
 +++ b/arch/arm/include/asm/arch-sunxi/display2.h
 @@ -0,0 +1,261 @@
@@ -448,10 +448,10 @@ index 0000000..755adeb
 +
 +#endif /* _SUNXI_DISPLAY_H */
 diff --git a/arch/arm/mach-sunxi/clock_sun6i.c b/arch/arm/mach-sunxi/clock_sun6i.c
-index ed8cd9b..bcf9aa1 100644
+index d123b3acb2..8e5728d801 100644
 --- a/arch/arm/mach-sunxi/clock_sun6i.c
 +++ b/arch/arm/mach-sunxi/clock_sun6i.c
-@@ -141,6 +141,17 @@ void clock_set_pll3(unsigned int clk)
+@@ -145,6 +145,17 @@ void clock_set_pll3(unsigned int clk)
  	       &ccm->pll3_cfg);
  }
  
@@ -469,7 +469,7 @@ index ed8cd9b..bcf9aa1 100644
  void clock_set_pll5(unsigned int clk, bool sigma_delta_enable)
  {
  	struct sunxi_ccm_reg * const ccm =
-@@ -213,6 +224,23 @@ done:
+@@ -217,6 +228,23 @@ done:
  }
  #endif
  
@@ -490,10 +490,10 @@ index ed8cd9b..bcf9aa1 100644
 +	       &ccm->pll10_cfg);
 +}
 +
- #ifdef CONFIG_MACH_SUN8I_A33
+ #if defined(CONFIG_MACH_SUN8I_A33) || defined(CONFIG_MACH_SUN50I)
  void clock_set_pll11(unsigned int clk, bool sigma_delta_enable)
  {
-@@ -267,6 +295,7 @@ unsigned int clock_get_mipi_pll(void)
+@@ -271,6 +299,7 @@ unsigned int clock_get_mipi_pll(void)
  	return ((src / 1000) * n * k / m) * 1000;
  }
  
@@ -501,16 +501,16 @@ index ed8cd9b..bcf9aa1 100644
  void clock_set_de_mod_clock(u32 *clk_cfg, unsigned int hz)
  {
  	int pll = clock_get_pll6() * 2;
-@@ -278,3 +307,4 @@ void clock_set_de_mod_clock(u32 *clk_cfg, unsigned int hz)
+@@ -282,3 +311,4 @@ void clock_set_de_mod_clock(u32 *clk_cfg, unsigned int hz)
  	writel(CCM_DE_CTRL_GATE | CCM_DE_CTRL_PLL6_2X | CCM_DE_CTRL_M(div),
  	       clk_cfg);
  }
 +#endif
 diff --git a/board/sunxi/Kconfig b/board/sunxi/Kconfig
-index c0ffeb3..77fdc8f 100644
+index 37b42521a4..0d66b1630a 100644
 --- a/board/sunxi/Kconfig
 +++ b/board/sunxi/Kconfig
-@@ -458,7 +458,7 @@ config AXP_GPIO
+@@ -485,7 +485,7 @@ config AXP_GPIO
  
  config VIDEO
  	bool "Enable graphical uboot console on HDMI, LCD or VGA"
@@ -519,7 +519,7 @@ index c0ffeb3..77fdc8f 100644
  	default y
  	---help---
  	Say Y here to add support for using a cfb console on the HDMI, LCD
-@@ -467,7 +467,7 @@ config VIDEO
+@@ -494,7 +494,7 @@ config VIDEO
  
  config VIDEO_HDMI
  	bool "HDMI output support"
@@ -529,7 +529,7 @@ index c0ffeb3..77fdc8f 100644
  	---help---
  	Say Y here to add support for outputting video over HDMI.
 diff --git a/drivers/video/Makefile b/drivers/video/Makefile
-index db34904..d05b745 100644
+index db34904a9a..d05b74514f 100644
 --- a/drivers/video/Makefile
 +++ b/drivers/video/Makefile
 @@ -52,6 +52,7 @@ obj-$(CONFIG_VIDEO_OMAP3) += omap3_dss.o
@@ -542,7 +542,7 @@ index db34904..d05b745 100644
  obj-$(CONFIG_VIDEO_VESA) += vesa.o
 diff --git a/drivers/video/sun8i_display.c b/drivers/video/sun8i_display.c
 new file mode 100644
-index 0000000..e596e4c
+index 0000000000..e596e4c2c9
 --- /dev/null
 +++ b/drivers/video/sun8i_display.c
 @@ -0,0 +1,928 @@
@@ -1475,7 +1475,7 @@ index 0000000..e596e4c
 +	return graphic_device;
 +}
 diff --git a/include/configs/sunxi-common.h b/include/configs/sunxi-common.h
-index e0464df..c63c1bc 100644
+index 3ac96da190..f35c15d998 100644
 --- a/include/configs/sunxi-common.h
 +++ b/include/configs/sunxi-common.h
 @@ -284,9 +284,13 @@ extern int soft_i2c_gpio_scl;
@@ -1493,10 +1493,10 @@ index e0464df..c63c1bc 100644
  #define CONFIG_VIDEO_LOGO
  #define CONFIG_VIDEO_STD_TIMINGS
 diff --git a/scripts/config_whitelist.txt b/scripts/config_whitelist.txt
-index 11b5a22..cef476f 100644
+index 37ce51a77f..5d5fae8c0d 100644
 --- a/scripts/config_whitelist.txt
 +++ b/scripts/config_whitelist.txt
-@@ -8270,6 +8270,7 @@ CONFIG_VIDEO_SM501_8BPP
+@@ -6852,6 +6852,7 @@ CONFIG_VIDEO_SM501_8BPP
  CONFIG_VIDEO_SM501_PCI
  CONFIG_VIDEO_STD_TIMINGS
  CONFIG_VIDEO_SUNXI
@@ -1505,5 +1505,5 @@ index 11b5a22..cef476f 100644
  CONFIG_VID_FLS_ENV
  CONFIG_VM86
 -- 
-2.10.2
+2.11.0
 

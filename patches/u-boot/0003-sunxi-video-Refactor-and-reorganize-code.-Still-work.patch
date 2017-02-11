@@ -1,4 +1,4 @@
-From 201e80d494b0c41d90eaeac8bbc217605d1e95db Mon Sep 17 00:00:00 2001
+From da98eeb5e7ab4695c1d220454fe5a51cb3ea484e Mon Sep 17 00:00:00 2001
 From: Jernej Skrabec <jernej.skrabec@siol.net>
 Date: Tue, 22 Nov 2016 23:35:31 +0100
 Subject: [PATCH 3/5] sunxi: video: Refactor and reorganize code. Still work to
@@ -15,7 +15,7 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
  rename drivers/video/{sun8i_display.c => sunxi_display2.c} (78%)
 
 diff --git a/arch/arm/include/asm/arch-sunxi/display2.h b/arch/arm/include/asm/arch-sunxi/display2.h
-index 755adeb..4867f63 100644
+index 755adeb64f..4867f63807 100644
 --- a/arch/arm/include/asm/arch-sunxi/display2.h
 +++ b/arch/arm/include/asm/arch-sunxi/display2.h
 @@ -3,71 +3,65 @@
@@ -205,7 +205,7 @@ index 755adeb..4867f63 100644
  #define SUNXI_LCDC_TCON1_CTRL_INTERLACE_ENABLE	(1 << 20)
  #define SUNXI_LCDC_TCON1_CTRL_ENABLE		(1 << 31)
 diff --git a/drivers/video/Makefile b/drivers/video/Makefile
-index d05b745..3097b82 100644
+index d05b74514f..3097b82580 100644
 --- a/drivers/video/Makefile
 +++ b/drivers/video/Makefile
 @@ -52,7 +52,7 @@ obj-$(CONFIG_VIDEO_OMAP3) += omap3_dss.o
@@ -221,7 +221,7 @@ diff --git a/drivers/video/sun8i_display.c b/drivers/video/sunxi_display2.c
 similarity index 78%
 rename from drivers/video/sun8i_display.c
 rename to drivers/video/sunxi_display2.c
-index e596e4c..cecaeb4 100644
+index e596e4c2c9..cecaeb48a1 100644
 --- a/drivers/video/sun8i_display.c
 +++ b/drivers/video/sunxi_display2.c
 @@ -47,54 +47,60 @@ struct sunxi_display {
@@ -758,7 +758,7 @@ index e596e4c..cecaeb4 100644
  			printf("HDMI connected: ");
  			if (edid && sunxi_hdmi_edid_get_mode(&custom) == 0)
 diff --git a/include/configs/sunxi-common.h b/include/configs/sunxi-common.h
-index c63c1bc..c6032aa 100644
+index f35c15d998..7bf52478f1 100644
 --- a/include/configs/sunxi-common.h
 +++ b/include/configs/sunxi-common.h
 @@ -289,7 +289,7 @@ extern int soft_i2c_gpio_scl;
@@ -771,10 +771,10 @@ index c63c1bc..c6032aa 100644
  
  #define CONFIG_VIDEO_LOGO
 diff --git a/scripts/config_whitelist.txt b/scripts/config_whitelist.txt
-index cef476f..be8850ae 100644
+index 5d5fae8c0d..e466213c6c 100644
 --- a/scripts/config_whitelist.txt
 +++ b/scripts/config_whitelist.txt
-@@ -8270,7 +8270,7 @@ CONFIG_VIDEO_SM501_8BPP
+@@ -6852,7 +6852,7 @@ CONFIG_VIDEO_SM501_8BPP
  CONFIG_VIDEO_SM501_PCI
  CONFIG_VIDEO_STD_TIMINGS
  CONFIG_VIDEO_SUNXI
@@ -784,5 +784,5 @@ index cef476f..be8850ae 100644
  CONFIG_VID_FLS_ENV
  CONFIG_VM86
 -- 
-2.10.2
+2.11.0
 

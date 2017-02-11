@@ -1,4 +1,4 @@
-From 6c842295e578666bee8c97e7082de298771cc309 Mon Sep 17 00:00:00 2001
+From cf66fd1001fdf9cf28fd1d6024a39a33e3eef37e Mon Sep 17 00:00:00 2001
 From: Icenowy Zheng <icenowy@aosc.xyz>
 Date: Mon, 28 Nov 2016 17:00:20 +0800
 Subject: [PATCH 5/5] video: sunxi: enable simplefb for H3
@@ -16,7 +16,7 @@ Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
  2 files changed, 62 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/video/sunxi_display2.c b/drivers/video/sunxi_display2.c
-index cecaeb4..a80ac2a 100644
+index cecaeb48a1..a80ac2a078 100644
 --- a/drivers/video/sunxi_display2.c
 +++ b/drivers/video/sunxi_display2.c
 @@ -25,6 +25,7 @@
@@ -92,7 +92,7 @@ index cecaeb4..a80ac2a 100644
 +}
 +#endif /* CONFIG_OF_BOARD_SETUP && CONFIG_VIDEO_DT_SIMPLEFB */
 diff --git a/include/configs/sunxi-common.h b/include/configs/sunxi-common.h
-index c6032aa..18b9b7a 100644
+index 7bf52478f1..e79f1941a3 100644
 --- a/include/configs/sunxi-common.h
 +++ b/include/configs/sunxi-common.h
 @@ -284,9 +284,8 @@ extern int soft_i2c_gpio_scl;
@@ -107,5 +107,5 @@ index c6032aa..18b9b7a 100644
  #else
  #define CONFIG_VIDEO_SUNXI2
 -- 
-2.10.2
+2.11.0
 

@@ -1,4 +1,4 @@
-From c620038640de2a2bdaf55804c51b3083f63e03ac Mon Sep 17 00:00:00 2001
+From 0848132d24e1ac686652a53de3ca5f714b08aed5 Mon Sep 17 00:00:00 2001
 From: Jernej Skrabec <jernej.skrabec@siol.net>
 Date: Mon, 14 Nov 2016 21:40:13 +0100
 Subject: [PATCH 2/5] sunxi: video: Enable H3 video driver in defconfigs
@@ -15,68 +15,68 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
  7 files changed, 7 insertions(+)
 
 diff --git a/configs/orangepi_2_defconfig b/configs/orangepi_2_defconfig
-index 4727aca..dea819d 100644
+index 74712c6d6e..76fc165fc9 100644
 --- a/configs/orangepi_2_defconfig
 +++ b/configs/orangepi_2_defconfig
-@@ -16,3 +16,4 @@ CONFIG_SPL=y
+@@ -19,3 +19,4 @@ CONFIG_SPL=y
  CONFIG_SUN8I_EMAC=y
  CONFIG_SY8106A_POWER=y
  CONFIG_USB_EHCI_HCD=y
 +CONFIG_VIDEO=y
 diff --git a/configs/orangepi_lite_defconfig b/configs/orangepi_lite_defconfig
-index 8545835..8801825 100644
+index 38f4583fd0..2850ceb54b 100644
 --- a/configs/orangepi_lite_defconfig
 +++ b/configs/orangepi_lite_defconfig
-@@ -12,3 +12,4 @@ CONFIG_SPL=y
- # CONFIG_CMD_FLASH is not set
- # CONFIG_CMD_FPGA is not set
+@@ -15,3 +15,4 @@ CONFIG_SPL=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
  CONFIG_USB_EHCI_HCD=y
 +CONFIG_VIDEO=y
 diff --git a/configs/orangepi_one_defconfig b/configs/orangepi_one_defconfig
-index 01b4ece..fc72a96 100644
+index 56c9a871b1..76ac5132f8 100644
 --- a/configs/orangepi_one_defconfig
 +++ b/configs/orangepi_one_defconfig
-@@ -13,3 +13,4 @@ CONFIG_SPL=y
- # CONFIG_CMD_FPGA is not set
+@@ -16,3 +16,4 @@ CONFIG_SPL=y
+ # CONFIG_SPL_EFI_PARTITION is not set
  CONFIG_SUN8I_EMAC=y
  CONFIG_USB_EHCI_HCD=y
 +CONFIG_VIDEO=y
 diff --git a/configs/orangepi_pc_defconfig b/configs/orangepi_pc_defconfig
-index 910d68e..e0b579d 100644
+index 8d331bdf91..54b4563706 100644
 --- a/configs/orangepi_pc_defconfig
 +++ b/configs/orangepi_pc_defconfig
-@@ -15,3 +15,4 @@ CONFIG_SPL=y
- CONFIG_SUN8I_EMAC=y
- CONFIG_SY8106A_POWER=y
- CONFIG_USB_EHCI_HCD=y
-+CONFIG_VIDEO=y
-diff --git a/configs/orangepi_pc_plus_defconfig b/configs/orangepi_pc_plus_defconfig
-index f43682b..9b8d407 100644
---- a/configs/orangepi_pc_plus_defconfig
-+++ b/configs/orangepi_pc_plus_defconfig
-@@ -16,3 +16,4 @@ CONFIG_SPL=y
- CONFIG_SUN8I_EMAC=y
- CONFIG_SY8106A_POWER=y
- CONFIG_USB_EHCI_HCD=y
-+CONFIG_VIDEO=y
-diff --git a/configs/orangepi_plus2e_defconfig b/configs/orangepi_plus2e_defconfig
-index df05d37..0eb9466 100644
---- a/configs/orangepi_plus2e_defconfig
-+++ b/configs/orangepi_plus2e_defconfig
-@@ -17,3 +17,4 @@ CONFIG_SPL=y
- CONFIG_SUN8I_EMAC=y
- CONFIG_SY8106A_POWER=y
- CONFIG_USB_EHCI_HCD=y
-+CONFIG_VIDEO=y
-diff --git a/configs/orangepi_plus_defconfig b/configs/orangepi_plus_defconfig
-index bf88fef..c773ef2 100644
---- a/configs/orangepi_plus_defconfig
-+++ b/configs/orangepi_plus_defconfig
 @@ -18,3 +18,4 @@ CONFIG_SPL=y
  CONFIG_SUN8I_EMAC=y
  CONFIG_SY8106A_POWER=y
  CONFIG_USB_EHCI_HCD=y
 +CONFIG_VIDEO=y
+diff --git a/configs/orangepi_pc_plus_defconfig b/configs/orangepi_pc_plus_defconfig
+index 636599c361..be1c4ad839 100644
+--- a/configs/orangepi_pc_plus_defconfig
++++ b/configs/orangepi_pc_plus_defconfig
+@@ -19,3 +19,4 @@ CONFIG_SPL=y
+ CONFIG_SUN8I_EMAC=y
+ CONFIG_SY8106A_POWER=y
+ CONFIG_USB_EHCI_HCD=y
++CONFIG_VIDEO=y
+diff --git a/configs/orangepi_plus2e_defconfig b/configs/orangepi_plus2e_defconfig
+index 60f4eaa655..8a4a336b06 100644
+--- a/configs/orangepi_plus2e_defconfig
++++ b/configs/orangepi_plus2e_defconfig
+@@ -20,3 +20,4 @@ CONFIG_SPL=y
+ CONFIG_SUN8I_EMAC=y
+ CONFIG_SY8106A_POWER=y
+ CONFIG_USB_EHCI_HCD=y
++CONFIG_VIDEO=y
+diff --git a/configs/orangepi_plus_defconfig b/configs/orangepi_plus_defconfig
+index 78be69eec5..4a96566bd2 100644
+--- a/configs/orangepi_plus_defconfig
++++ b/configs/orangepi_plus_defconfig
+@@ -21,3 +21,4 @@ CONFIG_SPL=y
+ CONFIG_SUN8I_EMAC=y
+ CONFIG_SY8106A_POWER=y
+ CONFIG_USB_EHCI_HCD=y
++CONFIG_VIDEO=y
 -- 
-2.10.2
+2.11.0
 
