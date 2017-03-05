@@ -14,7 +14,7 @@ diff --git a/arch/arm/boot/dts/sun8i-a33-q8-tablet.dts b/arch/arm/boot/dts/sun8i
 index 871a20c..e0697d9 100644
 --- a/arch/arm/boot/dts/sun8i-a33-q8-tablet.dts
 +++ b/arch/arm/boot/dts/sun8i-a33-q8-tablet.dts
-@@ -72,6 +72,14 @@
+@@ -72,6 +72,18 @@
  	};
  };
  
@@ -23,6 +23,10 @@ index 871a20c..e0697d9 100644
 +};
 +
 +&dai {
++	status = "okay";
++};
++
++&sound {
 +	status = "okay";
 +};
 +
