@@ -16,6 +16,7 @@
 #include <linux/mutex.h>
 #include <linux/workqueue.h>
 #include <linux/sched.h>
+#include <linux/module.h>
 #include <linux/atomic.h>
 #include <net/mac80211.h>
 
