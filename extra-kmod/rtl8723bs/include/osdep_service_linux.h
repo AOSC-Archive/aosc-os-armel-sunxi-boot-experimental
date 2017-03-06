@@ -35,6 +35,8 @@
 	#include <linux/sched.h>
 	#include <linux/etherdevice.h>
 	#include <linux/wireless.h>
+	#include <linux/signal.h>
+	#include <linux/sched/signal.h>
 	#include <net/iw_handler.h>
 	#include <linux/if_arp.h>
 	#include <linux/rtnetlink.h>
