@@ -19,6 +19,7 @@
 #include <linux/rtnetlink.h>
 #include <linux/firmware.h>
 #include <linux/sched.h>
+#include <linux/module.h>
 #include <net/cfg80211.h>
 #include <net/mac80211.h>
 #include <linux/time.h>
