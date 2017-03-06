@@ -17,15 +17,15 @@
 #include "xradio.h"
 #include "fwio.h"
 #include "hwio.h"
-#include "sbus.h"
 #include "bh.h"
+#include "sdio.h"
 
 /* Macroses are local. */
 #define APB_WRITE(reg, val) \
 	do { \
 		ret = xradio_apb_write_32(hw_priv, APB_ADDR(reg), (val)); \
 		if (ret < 0) { \
-			xradio_dbg(XRADIO_DBG_ERROR, \
+			dev_err(hw_priv->pdev, \
 				"%s: can't write %s at line %d.\n", \
 				__func__, #reg, __LINE__); \
 			goto error; \
@@ -35,7 +35,7 @@
 	do { \
 		ret = xradio_apb_read_32(hw_priv, APB_ADDR(reg), &(val)); \
 		if (ret < 0) { \
-			xradio_dbg(XRADIO_DBG_ERROR, \
+			dev_err(hw_priv->pdev, \
 				"%s: can't read %s at line %d.\n", \
 				__func__, #reg, __LINE__); \
 			goto error; \
@@ -45,7 +45,7 @@
 	do { \
 		ret = xradio_reg_write_32(hw_priv, (reg), (val)); \
 		if (ret < 0) { \
-			xradio_dbg(XRADIO_DBG_ERROR, \
+			dev_err(hw_priv->pdev, \
 				"%s: can't write %s at line %d.\n", \
 				__func__, #reg, __LINE__); \
 			goto error; \
@@ -55,7 +55,7 @@
 	do { \
 		ret = xradio_reg_read_32(hw_priv, (reg), &(val)); \
 		if (ret < 0) { \
-			xradio_dbg(XRADIO_DBG_ERROR, \
+			dev_err(hw_priv->pdev, \
 				"%s: can't read %s at line %d.\n", \
 				__func__, #reg, __LINE__); \
 			goto error; \
@@ -91,8 +91,7 @@ static int xradio_parse_sdd(struct xradio_common *hw_priv, u32 *dpll)
 	struct xradio_sdd *pElement = NULL;
 	int parsedLength = 0;
 
-	sta_printk(XRADIO_DBG_TRC,"%s\n", __func__);
-	SYS_BUG(hw_priv->sdd != NULL);
+	BUG_ON(hw_priv->sdd != NULL);
 
 	/* select and load sdd file depend on hardware version. */
 	switch (hw_priv->hw_revision) {
@@ -100,25 +99,16 @@ static int xradio_parse_sdd(struct xradio_common *hw_priv, u32 *dpll)
 		sdd_path = XR819_SDD_FILE;
 		break;
 	default:
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: unknown hardware version.\n", __func__);
+		dev_dbg(hw_priv->pdev, "unknown hardware version.\n");
 		return ret;
 	}
 
-#ifdef USE_VFS_FIRMWARE
-	hw_priv->sdd = xr_request_file(sdd_path);
-	if (unlikely(!hw_priv->sdd)) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: can't load sdd file %s.\n",
-		           __func__, sdd_path);
-		return ret;
-	}
-#else
 	ret = request_firmware(&hw_priv->sdd, sdd_path, hw_priv->pdev);
 	if (unlikely(ret)) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: can't load sdd file %s.\n",
-		           __func__, sdd_path);
+		dev_dbg(hw_priv->pdev, "can't load sdd file %s.\n",
+				sdd_path);
 		return ret;
 	}
-#endif
 
 	//parse SDD config.
 	hw_priv->is_BT_Present = false;
@@ -182,7 +172,7 @@ static int xradio_parse_sdd(struct xradio_common *hw_priv, u32 *dpll)
 		pElement = FIND_NEXT_ELT(pElement);
 	}
 	
-	xradio_dbg(XRADIO_DBG_MSG, "sdd size=%d parse len=%d.\n", 
+	dev_dbg(hw_priv->pdev, "sdd size=%d parse len=%d.\n",
 	           hw_priv->sdd->size, parsedLength);
 
 	//
@@ -201,20 +191,15 @@ static int xradio_firmware(struct xradio_common *hw_priv)
 	u32 put = 0, get = 0;
 	u8 *buf = NULL;
 	const char *fw_path;
-#ifdef USE_VFS_FIRMWARE
-	const struct xr_file  *firmware = NULL;
-#else
 	const struct firmware *firmware = NULL;
-#endif
-	xradio_dbg(XRADIO_DBG_TRC,"%s\n", __FUNCTION__);
 
 	switch (hw_priv->hw_revision) {
 	case XR819_HW_REV0:
 		fw_path = XR819_FIRMWARE;
 		break;
 	default:
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: invalid silicon revision %d.\n",
-		           __func__, hw_priv->hw_revision);
+		dev_dbg(hw_priv->pdev, "invalid silicon revision %d.\n",
+				hw_priv->hw_revision);
 		return -EINVAL;
 	}
 	/* Initialize common registers */
@@ -234,27 +219,17 @@ static int xradio_firmware(struct xradio_common *hw_priv)
 	REG_WRITE(HIF_CONFIG_REG_ID, val32);
 
 	/* Load a firmware file */
-#ifdef USE_VFS_FIRMWARE
-	firmware = xr_fileopen(fw_path, O_RDONLY, 0);
-	if (!firmware) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: can't load firmware file %s.\n",
-		           __func__, fw_path);
-		ret = -1;
-		goto error;
-	}
-#else
 	ret = request_firmware(&firmware, fw_path, hw_priv->pdev);
 	if (ret) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: can't load firmware file %s.\n",
-		           __func__, fw_path);
+		dev_dbg(hw_priv->pdev, "can't load firmware file %s.\n",
+				fw_path);
 		goto error;
 	}
-	SYS_BUG(!firmware->data);
-#endif
+	BUG_ON(!firmware->data);
 
-	buf = xr_kmalloc(DOWNLOAD_BLOCK_SIZE, true);
+	buf = kmalloc(DOWNLOAD_BLOCK_SIZE, GFP_KERNEL);
 	if (!buf) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: can't allocate firmware buffer.\n", __func__);
+		dev_dbg(hw_priv->pdev, "can't allocate firmware buffer.\n");
 		ret = -ENOMEM;
 		goto error;
 	}
@@ -267,7 +242,7 @@ static int xradio_firmware(struct xradio_common *hw_priv)
 		mdelay(10);
 	} /* End of for loop */
 	if (val32 != DOWNLOAD_I_AM_HERE) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: bootloader is not ready.\n", __func__);
+		dev_dbg(hw_priv->pdev, "bootloader is not ready.\n");
 		ret = -ETIMEDOUT;
 		goto error;
 	}
@@ -287,8 +262,8 @@ static int xradio_firmware(struct xradio_common *hw_priv)
 		/* check the download status */
 		APB_READ(DOWNLOAD_STATUS_REG, val32);
 		if (val32 != DOWNLOAD_PENDING) {
-			xradio_dbg(XRADIO_DBG_ERROR, "%s: bootloader reported error %d.\n",
-			           __func__, val32);
+			dev_dbg(hw_priv->pdev, "bootloader reported error %d.\n",
+					val32);
 			ret = -EIO;
 			goto error;
 		}
@@ -302,22 +277,15 @@ static int xradio_firmware(struct xradio_common *hw_priv)
 		}
 
 		if ((put - get) > (DOWNLOAD_FIFO_SIZE - DOWNLOAD_BLOCK_SIZE)) {
-			xradio_dbg(XRADIO_DBG_ERROR, "%s: Timeout waiting for FIFO.\n", __func__);
+			dev_dbg(hw_priv->pdev, "Timeout waiting for FIFO.\n");
 			ret = -ETIMEDOUT;
 			goto error;
 		}
 
 		/* calculate the block size */
 		tx_size = block_size = min((size_t)(firmware->size - put), (size_t)DOWNLOAD_BLOCK_SIZE);
-#ifdef USE_VFS_FIRMWARE
-		ret = xr_fileread(firmware, buf, block_size);
-		if (ret < block_size) {
-			xradio_dbg(XRADIO_DBG_ERROR, "%s: xr_fileread error %d.\n", __func__, ret);
-			goto error;
-		}
-#else
 		memcpy(buf, &firmware->data[put], block_size);
-#endif
+
 		if (block_size < DOWNLOAD_BLOCK_SIZE) {
 			memset(&buf[block_size], 0, DOWNLOAD_BLOCK_SIZE - block_size);
 			tx_size = DOWNLOAD_BLOCK_SIZE;
@@ -327,7 +295,7 @@ static int xradio_firmware(struct xradio_common *hw_priv)
 		ret = xradio_apb_write(hw_priv, APB_ADDR(DOWNLOAD_FIFO_OFFSET + (put & (DOWNLOAD_FIFO_SIZE - 1))), 
 		                       buf, tx_size);
 		if (ret < 0) {
-			xradio_dbg(XRADIO_DBG_ERROR, "%s: can't write block at line %d.\n", __func__, __LINE__);
+			dev_err(hw_priv->pdev, "%s: can't write block at line %d.\n", __func__, __LINE__);
 			goto error;
 		}
 
@@ -344,12 +312,12 @@ static int xradio_firmware(struct xradio_common *hw_priv)
 		mdelay(i);
 	}
 	if (val32 != DOWNLOAD_SUCCESS) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: wait for download completion failed. " \
-		           "Read: 0x%.8X\n", __func__, val32);
+		dev_dbg(hw_priv->pdev, "wait for download completion failed. " \
+		           "Read: 0x%.8X\n", val32);
 		ret = -ETIMEDOUT;
 		goto error;
 	} else {
-		xradio_dbg(XRADIO_DBG_ALWY, "Firmware completed.\n");
+		dev_dbg(hw_priv->pdev, "Firmware completed.\n");
 		ret = 0;
 	}
 
@@ -357,67 +325,39 @@ error:
 	if(buf)
 		kfree(buf);
 	if (firmware) {
-#ifdef USE_VFS_FIRMWARE
-		xr_fileclose(firmware);
-#else
 		release_firmware(firmware);
-#endif
 	}
 	return ret;
 }
 
 static int xradio_bootloader(struct xradio_common *hw_priv)
 {
-	int ret = -1;
-	u32 i = 0;
 	const char *bl_path = XR819_BOOTLOADER;
 	u32  addr = AHB_MEMORY_ADDRESS;
-	u32 *data = NULL;
-#ifdef USE_VFS_FIRMWARE
-	const struct xr_file  *bootloader = NULL;
-#else
-	const struct firmware *bootloader = NULL;
-#endif
-	xradio_dbg(XRADIO_DBG_TRC,"%s\n", __FUNCTION__);
+	int ret;
+	u32 i;
+	u32 *data;
+	const struct firmware *bootloader;
 
-#ifdef USE_VFS_FIRMWARE
-	bootloader = xr_request_file(bl_path);
-	if (!bootloader) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: can't load bootloader file %s.\n",
-		           __func__, bl_path);
-		goto error;
-	}
-#else
 	/* Load a bootloader file */
 	ret = request_firmware(&bootloader, bl_path, hw_priv->pdev);
 	if (ret) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: can't load bootloader file %s.\n",
-		           __func__, bl_path);
+		dev_dbg(hw_priv->pdev, "can't load bootloader file %s.\n",
+				bl_path);
 		goto error;
 	}
-#endif
-
-	xradio_dbg(XRADIO_DBG_NIY, "%s: bootloader size = %d, loopcount = %d\n",
-	          __func__,bootloader->size, (bootloader->size)/4);
 
 	/* Down bootloader. */
 	data = (u32 *)bootloader->data;
-	for(i = 0; i < (bootloader->size)/4; i++) {
+	for(i = 0; i < (bootloader->size)/4; i++, addr+=4) {
 		REG_WRITE(HIF_SRAM_BASE_ADDR_REG_ID, addr);
 		REG_WRITE(HIF_AHB_DPORT_REG_ID,data[i]);
-		if(i == 100 || i == 200 || i == 300 || i == 400 || i == 500 || i == 600 )
-			xradio_dbg(XRADIO_DBG_NIY, "%s: addr = 0x%x,data = 0x%x\n",__func__,addr, data[i]);
-		addr += 4;
 	}
-	xradio_dbg(XRADIO_DBG_ALWY, "Bootloader complete\n");
+	dev_dbg(hw_priv->pdev, "Bootloader complete\n");
 
 error:
 	if(bootloader) {
-#ifdef USE_VFS_FIRMWARE
-		xr_fileclose(bootloader);
-#else
 		release_firmware(bootloader);
-#endif
 	}
 	return ret;  
 }
@@ -431,15 +371,12 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 	u16 val16;
 	u32 dpll = 0;
 	int major_revision;
-	xradio_dbg(XRADIO_DBG_TRC,"%s\n", __FUNCTION__);
-
-	SYS_BUG(!hw_priv);
 
 	/* Read CONFIG Register Value - We will read 32 bits */
 	ret = xradio_reg_read_32(hw_priv, HIF_CONFIG_REG_ID, &val32);
 	if (ret < 0) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: can't read config register, err=%d.\n",
-		           __func__, ret);
+		dev_dbg(hw_priv->pdev, "can't read config register, err=%d.\n",
+				ret);
 		return ret;
 	}
 
@@ -447,19 +384,19 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 	hw_priv->hw_type = xradio_get_hw_type(val32, &major_revision);
 	switch (hw_priv->hw_type) {
 	case HIF_HW_TYPE_XRADIO:
-		xradio_dbg(XRADIO_DBG_NIY, "%s: HW_TYPE_XRADIO detected.\n", __func__);
+		dev_dbg(hw_priv->pdev, "HW_TYPE_XRADIO detected.\n");
 		break;
 	default:
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: Unknown hardware: %d.\n",  
-		           __func__, hw_priv->hw_type);
+		dev_dbg(hw_priv->pdev, "Unknown hardware: %d.\n",
+				hw_priv->hw_type);
 		return -ENOTSUPP;
 	}
 	if (major_revision == 4) {
 		hw_priv->hw_revision = XR819_HW_REV0;
-		xradio_dbg(XRADIO_DBG_ALWY, "XRADIO_HW_REV 1.0 detected.\n");
+		dev_dbg(hw_priv->pdev, "XRADIO_HW_REV 1.0 detected.\n");
 	} else {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: Unsupported major revision %d.\n",
-		           __func__, major_revision);
+		dev_dbg(hw_priv->pdev, "Unsupported major revision %d.\n",
+				major_revision);
 		return -ENOTSUPP;
 	}
 	
@@ -472,19 +409,19 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 	//set dpll initial value and check.
 	ret = xradio_reg_write_32(hw_priv, HIF_TSET_GEN_R_W_REG_ID, dpll);
 	if (ret < 0) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: can't write DPLL register.\n", __func__);
+		dev_dbg(hw_priv->pdev, "can't write DPLL register.\n");
 		goto out;
 	}
 	msleep(5);
 	ret = xradio_reg_read_32(hw_priv, HIF_TSET_GEN_R_W_REG_ID, &val32);
 	if (ret < 0) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: can't read DPLL register.\n", __func__);
+		dev_dbg(hw_priv->pdev, "can't read DPLL register.\n");
 		goto out;
 	}
 	if (val32 != dpll) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: unable to initialise " \
+		dev_dbg(hw_priv->pdev, "unable to initialise " \
 		           "DPLL register. Wrote 0x%.8X, read 0x%.8X.\n",
-		           __func__, dpll, val32);
+				   dpll, val32);
 		ret = -EIO;
 		goto out;
 	}
@@ -492,14 +429,12 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 	/* Set wakeup bit in device */
 	ret = xradio_reg_read_16(hw_priv, HIF_CONTROL_REG_ID, &val16);
 	if (ret < 0) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: set_wakeup: can't read control register.\n", 
-		           __func__);
+		dev_dbg(hw_priv->pdev, "set_wakeup: can't read control register.\n");
 		goto out;
 	}
 	ret = xradio_reg_write_16(hw_priv, HIF_CONTROL_REG_ID, val16 | HIF_CTRL_WUP_BIT);
 	if (ret < 0) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: set_wakeup: can't write control register.\n",
-		           __func__);
+		dev_dbg(hw_priv->pdev, "set_wakeup: can't write control register.\n");
 		goto out;
 	}
 
@@ -507,8 +442,8 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 	for (i = 0 ; i < 300 ; i += 1 + i / 2) {
 		ret = xradio_reg_read_16(hw_priv, HIF_CONTROL_REG_ID, &val16);
 		if (ret < 0) {
-			xradio_dbg(XRADIO_DBG_ERROR, "%s: Wait_for_wakeup: "
-			           "can't read control register.\n", __func__);
+			dev_dbg(hw_priv->pdev, "Wait_for_wakeup: "
+			           "can't read control register.\n");
 			goto out;
 		}
 		if (val16 & HIF_CTRL_RDY_BIT) {
@@ -517,47 +452,38 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 		msleep(i);
 	}
 	if ((val16 & HIF_CTRL_RDY_BIT) == 0) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: Wait for wakeup:" 
-		           "device is not responding.\n", __func__);
+		dev_dbg(hw_priv->pdev, "Wait for wakeup:"
+		           "device is not responding.\n");
 		ret = -ETIMEDOUT;
 		goto out;
 	} else {
-		xradio_dbg(XRADIO_DBG_NIY, "WLAN device is ready.\n");
+		dev_dbg(hw_priv->pdev, "WLAN device is ready.\n");
 	}
 
 	/* Checking for access mode and download firmware. */
 	ret = xradio_reg_read_32(hw_priv, HIF_CONFIG_REG_ID, &val32);
 	if (ret < 0) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: check_access_mode: "
-		           "can't read config register.\n", __func__);
+		dev_dbg(hw_priv->pdev, "check_access_mode: "
+		           "can't read config register.\n");
 		goto out;
 	}
 	if (val32 & HIF_CONFIG_ACCESS_MODE_BIT) {
 		/* Down bootloader. */
 		ret = xradio_bootloader(hw_priv);
 		if (ret < 0) {
-			xradio_dbg(XRADIO_DBG_ERROR, "%s: can't download bootloader.\n", __func__);
+			dev_dbg(hw_priv->pdev, "can't download bootloader.\n");
 			goto out;
 		}
 		/* Down firmware. */
 		ret = xradio_firmware(hw_priv);
 		if (ret < 0) {
-			xradio_dbg(XRADIO_DBG_ERROR, "%s: can't download firmware.\n", __func__);
+			dev_dbg(hw_priv->pdev, "can't download firmware.\n");
 			goto out;
 		}
 	} else {
-		xradio_dbg(XRADIO_DBG_WARN, "%s: check_access_mode: "
-		           "device is already in QUEUE mode.\n", __func__);
+		dev_dbg(hw_priv->pdev, "check_access_mode: "
+		           "device is already in QUEUE mode.\n");
 		/* TODO: verify this branch. Do we need something to do? */
-	}
-
-	/* Register Interrupt Handler */
-	ret = hw_priv->sbus_ops->irq_subscribe(hw_priv->sbus_priv, 
-	                                      (sbus_irq_handler)xradio_irq_handler, 
-	                                       hw_priv);
-	if (ret < 0) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: can't register IRQ handler.\n", __func__);
-		goto out;
 	}
 
 	if (HIF_HW_TYPE_XRADIO  == hw_priv->hw_type) {
@@ -565,15 +491,15 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 		 * are in CONFIG register */
 		ret = xradio_reg_read_32(hw_priv, HIF_CONFIG_REG_ID, &val32);
 		if (ret < 0) {
-			xradio_dbg(XRADIO_DBG_ERROR, "%s: enable_irq: can't read " \
-			           "config register.\n", __func__);
+			dev_dbg(hw_priv->pdev, "enable_irq: can't read " \
+			           "config register.\n");
 			goto unsubscribe;
 		}
 		ret = xradio_reg_write_32(hw_priv, HIF_CONFIG_REG_ID,
 			val32 | HIF_CONF_IRQ_RDY_ENABLE);
 		if (ret < 0) {
-			xradio_dbg(XRADIO_DBG_ERROR, "%s: enable_irq: can't write " \
-			           "config register.\n", __func__);
+			dev_dbg(hw_priv->pdev, "enable_irq: can't write " \
+			           "config register.\n");
 			goto unsubscribe;
 		}
 	} else {
@@ -582,15 +508,15 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 		/* Enable device interrupts - Both DATA_RDY and WLAN_RDY */
 		ret = xradio_reg_read_16(hw_priv, HIF_CONFIG_REG_ID, &val16);
 		if (ret < 0) {
-			xradio_dbg(XRADIO_DBG_ERROR, "%s: enable_irq: can't read " \
-			           "control register.\n", __func__);
+			dev_dbg(hw_priv->pdev, "enable_irq: can't read " \
+			           "control register.\n");
 			goto unsubscribe;
 		}
 		ret = xradio_reg_write_16(hw_priv, HIF_CONFIG_REG_ID, 
 		                          val16 | HIF_CTRL_IRQ_RDY_ENABLE);
 		if (ret < 0) {
-			xradio_dbg(XRADIO_DBG_ERROR, "%s: enable_irq: can't write " \
-			           "control register.\n", __func__);
+			dev_dbg(hw_priv->pdev, "enable_irq: can't write " \
+			           "control register.\n");
 			goto unsubscribe;
 		}
 
@@ -599,15 +525,13 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 	/* Configure device for MESSSAGE MODE */
 	ret = xradio_reg_read_32(hw_priv, HIF_CONFIG_REG_ID, &val32);
 	if (ret < 0) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: set_mode: can't read config register.\n",
-		           __func__);
+		dev_dbg(hw_priv->pdev, "set_mode: can't read config register.\n");
 		goto unsubscribe;
 	}
 	ret = xradio_reg_write_32(hw_priv, HIF_CONFIG_REG_ID,
 	                          val32 & ~HIF_CONFIG_ACCESS_MODE_BIT);
 	if (ret < 0) {
-		xradio_dbg(XRADIO_DBG_ERROR, "%s: set_mode: can't write config register.\n",
-			         __func__);
+		dev_dbg(hw_priv->pdev, "set_mode: can't write config register.\n");
 		goto unsubscribe;
 	}
 
@@ -618,14 +542,9 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 	return 0;
 
 unsubscribe:
-	hw_priv->sbus_ops->irq_unsubscribe(hw_priv->sbus_priv);
 out:
 	if (hw_priv->sdd) {
-#ifdef USE_VFS_FIRMWARE
-		xr_fileclose(hw_priv->sdd);
-#else
 		release_firmware(hw_priv->sdd);
-#endif
 		hw_priv->sdd = NULL;
 	}
 	return ret;
@@ -633,18 +552,9 @@ out:
 
 int xradio_dev_deinit(struct xradio_common *hw_priv)
 {
-	hw_priv->sbus_ops->irq_unsubscribe(hw_priv->sbus_priv);
 	if (hw_priv->sdd) {
-	#ifdef USE_VFS_FIRMWARE
-		xr_fileclose(hw_priv->sdd);
-	#else
 		release_firmware(hw_priv->sdd);
-	#endif
 		hw_priv->sdd = NULL;
 	}
 	return 0;
 }
-#undef APB_WRITE
-#undef APB_READ
-#undef REG_WRITE
-#undef REG_READ

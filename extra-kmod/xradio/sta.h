@@ -55,9 +55,6 @@ int xradio_get_stats(struct ieee80211_hw *dev,
 int xradio_get_tx_stats(struct ieee80211_hw *dev,
 			struct ieee80211_tx_queue_stats *stats);
 */
-int xradio_set_key(struct ieee80211_hw *dev, enum set_key_cmd cmd,
-                   struct ieee80211_vif *vif, struct ieee80211_sta *sta,
-                   struct ieee80211_key_conf *key);
 int xradio_set_rts_threshold(struct ieee80211_hw *hw, u32 value);
 
 void xradio_flush(struct ieee80211_hw *hw, struct ieee80211_vif *vif, u32 queues, bool drop);
@@ -122,16 +119,4 @@ int xradio_set_macaddrfilter(struct xradio_common *hw_priv, struct xradio_vif *p
 int xradio_testmode_event(struct wiphy *wiphy, const u32 msg_id,
                           const void *data, int len, gfp_t gfp);
 #endif /*ROAM_OFFLOAD*/
-#ifdef IPV6_FILTERING
-int xradio_set_na(struct ieee80211_hw *hw, struct ieee80211_vif *vif);
-#endif /*IPV6_FILTERING*/
-#ifdef CONFIG_XRADIO_TESTMODE
-void xradio_device_power_calc(struct xradio_common *priv,
-                              s16 max_output_power, s16 fe_cor, u32 band);
-int xradio_testmode_cmd(struct ieee80211_hw *hw, void *data, int len);
-int xradio_tesmode_event(struct wiphy *wiphy, const u32 msg_id,
-                         const void *data, int len, gfp_t gfp);
-int xradio_get_tx_power_range(struct ieee80211_hw *hw);
-int xradio_get_tx_power_level(struct ieee80211_hw *hw);
-#endif /* CONFIG_XRADIO_TESTMODE */
 #endif

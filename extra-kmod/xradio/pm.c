@@ -15,8 +15,7 @@
 #include "pm.h"
 #include "sta.h"
 #include "bh.h"
-#include "sbus.h"
-#include "platform.h"
+#include "sdio.h"
 
 #define XRADIO_BEACON_SKIPPING_MULTIPLIER 3
 
@@ -233,7 +232,7 @@ void xradio_pm_stay_awake(struct xradio_pm_state *pm,
 }
 void xradio_pm_lock_awake(struct xradio_pm_state *pm)
 {
-	pm_printk(XRADIO_DBG_NIY, "%s\n", __func__);
+
 	spin_lock_bh(&pm->lock);
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0))
 	pm->expires_save = pm->wakelock.ws.timer.expires;
@@ -245,7 +244,7 @@ void xradio_pm_lock_awake(struct xradio_pm_state *pm)
 }
 void xradio_pm_unlock_awake(struct xradio_pm_state *pm)
 {
-	pm_printk(XRADIO_DBG_NIY, "%s\n", __func__);
+
 	spin_lock_bh(&pm->lock);
 	pm->expires_save -= jiffies;
 	if (pm->expires_save)
@@ -279,7 +278,6 @@ int xradio_pm_init(struct xradio_pm_state *pm,
 
 void xradio_pm_deinit(struct xradio_pm_state *pm)
 {
-	pm_printk(XRADIO_DBG_TRC,"%s\n", __FUNCTION__);
 	del_timer_sync(&pm->stay_awake);
 	xradio_pm_deinit_common(pm);
 }
@@ -288,7 +286,6 @@ void xradio_pm_stay_awake(struct xradio_pm_state *pm,
 			  unsigned long tmo)
 {
 	long cur_tmo;
-	pm_printk(XRADIO_DBG_MSG, "%s\n", __func__);
 
 	spin_lock_bh(&pm->lock);
 	cur_tmo = pm->stay_awake.expires - jiffies;
@@ -298,7 +295,7 @@ void xradio_pm_stay_awake(struct xradio_pm_state *pm,
 }
 void xradio_pm_lock_awake(struct xradio_pm_state *pm)
 {
-	pm_printk(XRADIO_DBG_NIY, "%s\n", __func__);
+
 	spin_lock_bh(&pm->lock);
 	pm->expires_save = pm->stay_awake.expires;
 	mod_timer(&pm->stay_awake, jiffies + LONG_MAX);
@@ -306,7 +303,7 @@ void xradio_pm_lock_awake(struct xradio_pm_state *pm)
 }
 void xradio_pm_unlock_awake(struct xradio_pm_state *pm)
 {
-	pm_printk(XRADIO_DBG_NIY, "%s\n", __func__);
+
 	spin_lock_bh(&pm->lock);
 	if (time_before(jiffies, pm->expires_save))
 		mod_timer(&pm->stay_awake, pm->expires_save);
@@ -347,17 +344,17 @@ static int xradio_resume_work(struct xradio_common *hw_priv,
 static int xradio_suspend_late(struct device *dev)
 {
 	struct xradio_common *hw_priv = dev->platform_data;
-	pm_printk(XRADIO_DBG_NIY, "%s\n", __func__);
+
 #ifdef CONFIG_XRADIO_SUSPEND_POWER_OFF
 	if (XRADIO_POWEROFF_SUSP == atomic_read(&hw_priv->suspend_state)) {
 		return 0; /* we don't rx data when power down wifi.*/
 	}
 #endif
 
-	if (atomic_read(&hw_priv->bh_rx)) {
-		pm_printk(XRADIO_DBG_WARN, "%s: Suspend interrupted.\n", __func__);
-		return -EAGAIN;
-	}
+	//if (atomic_read(&hw_priv->bh_rx)) {
+	//	pm_printk(XRADIO_DBG_WARN, "%s: Suspend interrupted.\n", __func__);
+	//	return -EAGAIN;
+	//}
 	return 0;
 }
 
@@ -378,25 +375,17 @@ int xradio_wow_suspend(struct ieee80211_hw *hw, struct cfg80211_wowlan *wowlan)
 	struct xradio_common *hw_priv = hw->priv;
 	struct xradio_vif *priv;
 	int i, ret = 0;
-	pm_printk(XRADIO_DBG_NIY, "%s\n", __func__);
+
 
 	if(hw_priv->bh_error) return -EBUSY;
 	WARN_ON(!atomic_read(&hw_priv->num_vifs));
 
-#ifdef HW_RESTART
-	if (work_pending(&hw_priv->hw_restart_work))
-		return -EBUSY;
-#endif
 	if (work_pending(&hw_priv->query_work))
 		return -EBUSY;
 
 #ifdef ROAM_OFFLOAD
 	xradio_for_each_vif(hw_priv, priv, i) {
-#ifdef P2P_MULTIVIF
-		if ((i == (XRWL_MAX_VIFS - 1)) || !priv)
-#else
 		if (!priv)
-#endif
 			continue;
 		if((priv->vif->type == NL80211_IFTYPE_STATION)
 		&& (priv->join_status == XRADIO_JOIN_STATUS_STA)) {
@@ -463,11 +452,7 @@ int xradio_wow_suspend(struct ieee80211_hw *hw, struct cfg80211_wowlan *wowlan)
 #endif
 	
 	xradio_for_each_vif(hw_priv, priv, i) {
-#ifdef P2P_MULTIVIF
-		if ((i == (XRWL_MAX_VIFS - 1)) || !priv)
-#else
 		if (!priv)
-#endif
 			continue;
 
 		ret = __xradio_wow_suspend(priv, wowlan);
@@ -493,7 +478,7 @@ int xradio_wow_suspend(struct ieee80211_hw *hw, struct cfg80211_wowlan *wowlan)
 	}
 
 	/* Enable IRQ wake */
-	ret = hw_priv->sbus_ops->power_mgmt(hw_priv->sbus_priv, true);
+	ret = sdio_pm(hw_priv, true);
 	if (ret) {
 		pm_printk(XRADIO_DBG_WARN, "Don't suspend sbus pm failed\n");
 		xradio_wow_resume(hw);
@@ -501,12 +486,12 @@ int xradio_wow_suspend(struct ieee80211_hw *hw, struct cfg80211_wowlan *wowlan)
 	}
 
 	/* Force resume if event is coming from the device. */
-	if (atomic_read(&hw_priv->bh_rx)) {
-		pm_printk(XRADIO_DBG_WARN, "Don't suspend "
-		           "because of recieved rx event!\n");
-		xradio_wow_resume(hw);
-		return -EAGAIN;
-	}
+	//if (atomic_read(&hw_priv->bh_rx)) {
+	//	pm_printk(XRADIO_DBG_WARN, "Don't suspend "
+	//	           "because of recieved rx event!\n");
+	//	xradio_wow_resume(hw);
+	//	return -EAGAIN;
+	//}
 	return 0;
 
 revert3:
@@ -532,7 +517,7 @@ static int __xradio_wow_suspend(struct xradio_vif *priv,
 		.flags    = 0x1,
 	};
 #endif
-	pm_printk(XRADIO_DBG_NIY, "%s\n", __func__);
+
 
 	/* Do not suspend when join work is scheduled */
 	if (work_pending(&priv->join_work)) {
@@ -576,7 +561,7 @@ static int __xradio_wow_suspend(struct xradio_vif *priv,
 #endif
 
 	/* Allocate state */
-	state = xr_kzalloc(sizeof(struct xradio_suspend_state), false);
+	state = kzalloc(sizeof(struct xradio_suspend_state), GFP_KERNEL);
 	if (!state) {
 		pm_printk(XRADIO_DBG_WARN, "%s:Do not suspend "
 		           "alloc xradio_suspend_state failed.\n", __func__);
@@ -657,7 +642,7 @@ int xradio_wow_resume(struct ieee80211_hw *hw)
 	struct xradio_vif *priv;
 	int i, ret = 0;
 
-	pm_printk(XRADIO_DBG_NIY, "%s\n", __func__);
+
 	WARN_ON(!atomic_read(&hw_priv->num_vifs));
 	if(hw_priv->bh_error) return 0;
 
@@ -668,7 +653,7 @@ int xradio_wow_resume(struct ieee80211_hw *hw)
 #endif
 
 	/* Disable IRQ wake */
-	hw_priv->sbus_ops->power_mgmt(hw_priv->sbus_priv, false);
+	sdio_pm(hw_priv, false);
 
 	up(&hw_priv->scan.lock);
 
@@ -676,11 +661,7 @@ int xradio_wow_resume(struct ieee80211_hw *hw)
 	WARN_ON(xradio_bh_resume(hw_priv));
 
 	xradio_for_each_vif(hw_priv, priv, i) {
-#ifdef P2P_MULTIVIF
-		if ((i == (XRWL_MAX_VIFS - 1)) || !priv)
-#else
 		if (!priv)
-#endif
 			continue;
 		ret = __xradio_wow_resume(priv);
 		if (ret) {
@@ -709,7 +690,7 @@ static int __xradio_wow_resume(struct xradio_vif *priv)
 		.flags = 0x0,
 	};
 #endif
-	pm_printk(XRADIO_DBG_NIY, "%s\n", __func__);
+
 
 	/* Restore suspend state */
 	state = pm_state_vif->suspend_state;
@@ -786,14 +767,14 @@ static int __xradio_wow_resume(struct xradio_vif *priv)
 #ifdef CONFIG_XRADIO_SUSPEND_POWER_OFF
 static int xradio_poweroff_suspend(struct xradio_common *hw_priv)
 {
-	pm_printk(XRADIO_DBG_NIY, "%s\n", __func__);
+
 	//flush all work.
 	cancel_work_sync(&hw_priv->query_work);
 	flush_workqueue(hw_priv->workqueue);
 	/* Schedule hardware restart, ensure no cmds in progress.*/
 	mutex_lock(&hw_priv->wsm_cmd_mux);
 	atomic_set(&hw_priv->suspend_state, XRADIO_POWEROFF_SUSP);
-	hw_priv->hw_restart = true;
+	//hw_priv->hw_restart = true;
 	mutex_unlock(&hw_priv->wsm_cmd_mux);
 	/* Stop serving thread */
 	if (xradio_bh_suspend(hw_priv)) {
@@ -801,21 +782,19 @@ static int xradio_poweroff_suspend(struct xradio_common *hw_priv)
 		return -EBUSY;
 	}
 
-	/* Going to sleep with wifi power down. */
-	xradio_wlan_power(0);
 	return 0;
 }
 
 static int xradio_poweroff_resume(struct xradio_common *hw_priv)
 {
-	pm_printk(XRADIO_DBG_NIY, "%s\n", __func__);
+
 	/* Revert locks */
 	wsm_unlock_tx(hw_priv);
 	up(&hw_priv->scan.lock);
 	mutex_unlock(&hw_priv->conf_mutex);
 	mutex_unlock(&hw_priv->wsm_oper_lock);
-	if (schedule_work(&hw_priv->hw_restart_work) <= 0)
-		pm_printk(XRADIO_DBG_ERROR, "%s restart_work failed!\n", __func__);
+	//if (schedule_work(&hw_priv->hw_restart_work) <= 0)
+	//	pm_printk(XRADIO_DBG_ERROR, "%s restart_work failed!\n", __func__);
 	return 0;
 }
 #endif

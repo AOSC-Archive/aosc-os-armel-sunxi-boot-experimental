@@ -13,9 +13,6 @@
 #include <linux/sched.h>
 #include "xradio.h"
 #include "queue.h"
-#ifdef CONFIG_XRADIO_TESTMODE
-#include <linux/time.h>
-#endif /*CONFIG_XRADIO_TESTMODE*/
 
 /* private */ struct xradio_queue_item
 {
@@ -24,10 +21,6 @@
 	u32			packetID;
 	unsigned long		queue_timestamp;
 	unsigned long		xmit_timestamp;
-#ifdef CONFIG_XRADIO_TESTMODE
-	unsigned long		mdelay_timestamp;
-	unsigned long		qdelay_timestamp;
-#endif /*CONFIG_XRADIO_TESTMODE*/
 	struct xradio_txpriv	txpriv;
 	u8			generation;
 	u8			pack_stk_wr;
@@ -46,7 +39,7 @@ static inline void __xradio_queue_lock(struct xradio_queue *queue)
 static inline void __xradio_queue_unlock(struct xradio_queue *queue)
 {
 	struct xradio_queue_stats *stats = queue->stats;
-	SYS_BUG(!queue->tx_locked_cnt);
+	BUG_ON(!queue->tx_locked_cnt);
 	if (--queue->tx_locked_cnt == 0) {
 		txrx_printk(XRADIO_DBG_MSG, "[TX] Queue %d is unlocked.\n",
 				queue->queue_id);
@@ -100,8 +93,8 @@ static void xradio_queue_register_post_gc(struct list_head *gc_list,
 				     struct xradio_queue_item *item)
 {
 	struct xradio_queue_item *gc_item;
-	gc_item = xr_kmalloc(sizeof(struct xradio_queue_item), false);
-	SYS_BUG(!gc_item);
+	gc_item = kmalloc(sizeof(struct xradio_queue_item), GFP_KERNEL);
+	BUG_ON(!gc_item);
 	memcpy(gc_item, item, sizeof(struct xradio_queue_item));
 	list_add_tail(&gc_item->head, gc_list);
 }
@@ -189,7 +182,7 @@ int xradio_queue_stats_init(struct xradio_queue_stats *stats,
 	spin_lock_init(&stats->lock);
 	init_waitqueue_head(&stats->wait_link_id_empty);
 	for (i = 0; i < XRWL_MAX_VIFS; i++) {
-		stats->link_map_cache[i] = xr_kzalloc(sizeof(int[map_capacity]), false);
+		stats->link_map_cache[i] = kzalloc(sizeof(int[map_capacity]), GFP_KERNEL);
 		if (!stats->link_map_cache[i]) {
 			for (; i >= 0; i--)
 				kfree(stats->link_map_cache[i]);
@@ -221,14 +214,14 @@ int xradio_queue_init(struct xradio_queue *queue,
 	queue->gc.data = (unsigned long)queue;
 	queue->gc.function = xradio_queue_gc;
 
-	queue->pool = xr_kzalloc(sizeof(struct xradio_queue_item) * capacity,
-	                         false);
+	queue->pool = kzalloc(sizeof(struct xradio_queue_item) * capacity,
+	                         GFP_KERNEL);
 	if (!queue->pool)
 		return -ENOMEM;
 
 	for (i = 0; i < XRWL_MAX_VIFS; i++) {
 		queue->link_map_cache[i] =
-				xr_kzalloc(sizeof(int[stats->map_capacity]), false);
+				kzalloc(sizeof(int[stats->map_capacity]), GFP_KERNEL);
 		if (!queue->link_map_cache[i]) {
 			for (; i >= 0; i--)
 				kfree(queue->link_map_cache[i]);
@@ -259,7 +252,7 @@ int xradio_queue_clear(struct xradio_queue *queue, int if_id)
 	while (!list_empty(&queue->pending)) {
 		struct xradio_queue_item *item = list_first_entry(
 			&queue->pending, struct xradio_queue_item, head);
-		SYS_WARN(!item->skb);
+		WARN_ON(!item->skb);
 		if (XRWL_ALL_IFS == if_id || item->txpriv.if_id == if_id) {
 			xradio_queue_register_post_gc(&gc_list, item);
 			item->skb = NULL;
@@ -366,9 +359,6 @@ int xradio_queue_put(struct xradio_queue *queue, struct sk_buff *skb,
                      struct xradio_txpriv *txpriv)
 {
 	int ret = 0;
-#ifdef CONFIG_XRADIO_TESTMODE
-	struct timeval tmval;
-#endif /*CONFIG_XRADIO_TESTMODE*/
 	LIST_HEAD(gc_list);
 	struct xradio_queue_stats *stats = queue->stats;
 	/* TODO:COMBO: Add interface ID info to queue item */
@@ -377,10 +367,10 @@ int xradio_queue_put(struct xradio_queue *queue, struct sk_buff *skb,
 		return -EINVAL;
 
 	spin_lock_bh(&queue->lock);
-	if (!SYS_WARN(list_empty(&queue->free_pool))) {
+	if (!WARN_ON(list_empty(&queue->free_pool))) {
 		struct xradio_queue_item *item = list_first_entry(
 			&queue->free_pool, struct xradio_queue_item, head);
-		SYS_BUG(item->skb);
+		BUG_ON(item->skb);
 
 		list_move_tail(&item->head, &queue->queue);
 		item->skb = skb;
@@ -392,10 +382,6 @@ int xradio_queue_put(struct xradio_queue *queue, struct sk_buff *skb,
 			item->generation, item - queue->pool,
 			txpriv->if_id, txpriv->raw_link_id);
 		item->queue_timestamp = jiffies;
-#ifdef CONFIG_XRADIO_TESTMODE
-		do_gettimeofday(&tmval);
-		item->qdelay_timestamp = tmval.tv_usec;
-#endif /*CONFIG_XRADIO_TESTMODE*/
 
 #ifdef TES_P2P_0002_ROC_RESTART
 		if (TES_P2P_0002_state == TES_P2P_0002_STATE_SEND_RESP) {
@@ -453,9 +439,6 @@ int xradio_queue_get(struct xradio_queue *queue,
 	struct xradio_queue_item *item;
 	struct xradio_queue_stats *stats = queue->stats;
 	bool wakeup_stats = false;
-#ifdef CONFIG_XRADIO_TESTMODE
-	struct timeval tmval;
-#endif /*CONFIG_XRADIO_TESTMODE*/
 
 	spin_lock_bh(&queue->lock);
 	list_for_each_entry(item, &queue->queue, head) {
@@ -466,7 +449,7 @@ int xradio_queue_get(struct xradio_queue *queue,
 		}
 	}
 
-	if (!SYS_WARN(ret)) {
+	if (!WARN_ON(ret)) {
 		*tx = (struct wsm_tx *)item->skb->data;
 		*tx_info = IEEE80211_SKB_CB(item->skb);
 		*txpriv = &item->txpriv;
@@ -477,10 +460,6 @@ int xradio_queue_get(struct xradio_queue *queue,
 		--queue->link_map_cache[item->txpriv.if_id]
 				[item->txpriv.link_id];
 		item->xmit_timestamp = jiffies;
-#ifdef CONFIG_XRADIO_TESTMODE
-		do_gettimeofday(&tmval);
-		item->mdelay_timestamp = tmval.tv_usec;
-#endif /*CONFIG_XRADIO_TESTMODE*/
 
 		spin_lock_bh(&stats->lock);
 		--stats->num_queued[item->txpriv.if_id];
@@ -506,12 +485,7 @@ int xradio_queue_get(struct xradio_queue *queue,
 	return ret;
 }
 
-#ifdef CONFIG_XRADIO_TESTMODE
-int xradio_queue_requeue(struct xradio_common *hw_priv,
-	struct xradio_queue *queue, u32 packetID, bool check)
-#else
 int xradio_queue_requeue(struct xradio_queue *queue, u32 packetID, bool check)
-#endif
 {
 	int ret = 0;
 	u8 queue_generation, queue_id, item_generation, item_id, if_id, link_id;
@@ -522,37 +496,27 @@ int xradio_queue_requeue(struct xradio_queue *queue, u32 packetID, bool check)
 				&item_generation, &item_id, &if_id, &link_id);
 
 	item = &queue->pool[item_id];
-#ifdef P2P_MULTIVIF
-	if (check && item->txpriv.if_id == XRWL_GENERIC_IF_ID) {
-#else
 	if (check && item->txpriv.offchannel_if_id == XRWL_GENERIC_IF_ID) {
-#endif
 		txrx_printk(XRADIO_DBG_MSG, "Requeued frame dropped for "
 						"generic interface id.\n");
-#ifdef CONFIG_XRADIO_TESTMODE
-		xradio_queue_remove(hw_priv, queue, packetID);
-#else
 		xradio_queue_remove(queue, packetID);
-#endif
 		return 0;
 	}
 
-#ifndef P2P_MULTIVIF
 	if (!check)
 		item->txpriv.offchannel_if_id = XRWL_GENERIC_IF_ID;
-#endif
 
 	/*if_id = item->txpriv.if_id;*/
 
 	spin_lock_bh(&queue->lock);
-	SYS_BUG(queue_id != queue->queue_id);
+	BUG_ON(queue_id != queue->queue_id);
 	if (unlikely(queue_generation != queue->generation)) {
 		ret = -ENOENT;
 	} else if (unlikely(item_id >= (unsigned) queue->capacity)) {
-		SYS_WARN(1);
+		WARN_ON(1);
 		ret = -EINVAL;
 	} else if (unlikely(item->generation != item_generation)) {
-		SYS_WARN(1);
+		WARN_ON(1);
 		ret = -ENOENT;
 	} else {
 		--queue->num_pending;
@@ -613,12 +577,8 @@ int xradio_queue_requeue_all(struct xradio_queue *queue)
 
 	return 0;
 }
-#ifdef CONFIG_XRADIO_TESTMODE
-int xradio_queue_remove(struct xradio_common *hw_priv,
-				struct xradio_queue *queue, u32 packetID)
-#else
+
 int xradio_queue_remove(struct xradio_queue *queue, u32 packetID)
-#endif /*CONFIG_XRADIO_TESTMODE*/
 {
 	int ret = 0;
 	u8 queue_generation, queue_id, item_generation, item_id, if_id, link_id;
@@ -633,15 +593,15 @@ int xradio_queue_remove(struct xradio_queue *queue, u32 packetID)
 	item = &queue->pool[item_id];
 
 	spin_lock_bh(&queue->lock);
-	SYS_BUG(queue_id != queue->queue_id);
+	BUG_ON(queue_id != queue->queue_id);
 	/*TODO:COMBO:Add check for interface ID also */
 	if (unlikely(queue_generation != queue->generation)) {
 		ret = -ENOENT;
 	} else if (unlikely(item_id >= (unsigned) queue->capacity)) {
-		SYS_WARN(1);
+		WARN_ON(1);
 		ret = -EINVAL;
 	} else if (unlikely(item->generation != item_generation)) {
-		SYS_WARN(1);
+		WARN_ON(1);
 		ret = -ENOENT;
 	} else {
 		gc_txpriv = item->txpriv;
@@ -653,43 +613,7 @@ int xradio_queue_remove(struct xradio_queue *queue, u32 packetID)
 		--queue->num_queued_vif[if_id];
 		++queue->num_sent;
 		++item->generation;
-#ifdef CONFIG_XRADIO_TESTMODE
-		spin_lock_bh(&hw_priv->tsm_lock);
-		if (hw_priv->start_stop_tsm.start) {
-			if (queue_id == hw_priv->tsm_info.ac) {
-				struct timeval tmval;
-				unsigned long queue_delay;
-				unsigned long media_delay;
-				do_gettimeofday(&tmval);
 
-				if (tmval.tv_usec > item->qdelay_timestamp)
-					queue_delay = tmval.tv_usec -
-						item->qdelay_timestamp;
-				else
-					queue_delay = tmval.tv_usec +
-					1000000 - item->qdelay_timestamp;
-
-				if (tmval.tv_usec > item->mdelay_timestamp)
-					media_delay = tmval.tv_usec -
-						item->mdelay_timestamp;
-				else
-					media_delay = tmval.tv_usec +
-					1000000 - item->mdelay_timestamp;
-				hw_priv->tsm_info.sum_media_delay +=
-							media_delay;
-				hw_priv->tsm_info.sum_pkt_q_delay += queue_delay;
-				if (queue_delay <= 10000)
-					hw_priv->tsm_stats.bin0++;
-				else if (queue_delay <= 20000)
-					hw_priv->tsm_stats.bin1++;
-				else if (queue_delay <= 40000)
-					hw_priv->tsm_stats.bin2++;
-				else
-					hw_priv->tsm_stats.bin3++;
-			}
-		}
-		spin_unlock_bh(&hw_priv->tsm_lock);
-#endif /*CONFIG_XRADIO_TESTMODE*/
 		/* Do not use list_move_tail here, but list_move:
 		 * try to utilize cache row.
 		 */
@@ -730,15 +654,15 @@ int xradio_queue_get_skb(struct xradio_queue *queue, u32 packetID,
 	item = &queue->pool[item_id];
 
 	spin_lock_bh(&queue->lock);
-	SYS_BUG(queue_id != queue->queue_id);
+	BUG_ON(queue_id != queue->queue_id);
 	/* TODO:COMBO: Add check for interface ID here */
 	if (unlikely(queue_generation != queue->generation)) {
 		ret = -ENOENT;
 	} else if (unlikely(item_id >= (unsigned) queue->capacity)) {
-		SYS_WARN(1);
+		WARN_ON(1);
 		ret = -EINVAL;
 	} else if (unlikely(item->generation != item_generation)) {
-		SYS_WARN(1);
+		WARN_ON(1);
 		ret = -ENOENT;
 	} else {
 		*skb = item->skb;

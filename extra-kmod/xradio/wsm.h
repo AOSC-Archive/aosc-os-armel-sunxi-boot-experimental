@@ -127,11 +127,6 @@ struct xradio_common;
 
 /* The maximum number of SSIDs that the device can scan for. */
 #define WSM_SCAN_MAX_NUM_OF_SSIDS	(2)
-#ifdef CONFIG_XRADIO_TESTMODE
-/* Transmit flags */
-/* Start Expiry time from the receipt of tx request */
-#define WSM_TX_FLAG_EXPIRY_TIME		(BIT(0))
-#endif /*CONFIG_XRADIO_TESTMODE*/
 
 /* Power management modes */
 /* 802.11 Active mode */
@@ -574,14 +569,6 @@ struct xradio_common;
 #define WSM_MIB_ID_FORWARDING_OFFLOAD		0x1033
 #endif
 
-#ifdef IPV6_FILTERING
-/* IpV6 Addr Filter */
-/* 4.52 Neighbor solicitation IPv6 address table */
-#define WSM_MIB_IP_IPV6_ADDR_FILTER		0x1032
-#define WSM_MIB_ID_NS_IP_ADDRESSES_TABLE	0x1034
-#define WSM_MAX_NDP_IP_ADDRTABLE_ENTRIES	1
-#endif /*IPV6_FILTERING*/
-
 /* Frame template types */
 #define WSM_FRAME_TYPE_PROBE_REQUEST	(0)
 #define WSM_FRAME_TYPE_BEACON		(1)
@@ -590,10 +577,6 @@ struct xradio_common;
 #define WSM_FRAME_TYPE_PS_POLL		(4)
 #define WSM_FRAME_TYPE_PROBE_RESPONSE	(5)
 #define WSM_FRAME_TYPE_ARP_REPLY        (6)
-
-#ifdef IPV6_FILTERING
-#define WSM_FRAME_TYPE_NA               (7)
-#endif /*IPV6_FILTERING*/
 
 #define WSM_FRAME_GREENFIELD		(0x80)	/* See 4.11 */
 
@@ -733,9 +716,6 @@ int wsm_reset(struct xradio_common *hw_priv, const struct wsm_reset *arg,
 	      int if_id);
 
 //add by yangfh
-void wsm_upper_restart(struct xradio_common *hw_priv);
-
-//add by yangfh
 void wsm_query_work(struct work_struct *work);
 
 /* 3.5 */
@@ -773,9 +753,6 @@ struct wsm_scan_complete {
 	u16 reserved;
 #endif /*ROAM_OFFLOAD*/
 };
-
-typedef void (*wsm_scan_complete_cb) (struct xradio_common *hw_priv,
-				      struct wsm_scan_complete *arg);
 
 /* 3.9 */
 struct wsm_scan {
@@ -864,8 +841,6 @@ struct wsm_tx_confirm {
 };
 
 /* 3.15 */
-typedef void (*wsm_tx_confirm_cb) (struct xradio_common *hw_priv,
-				   struct wsm_tx_confirm *arg);
 
 /* Note that ideology of wsm_tx struct is different against the rest of
  * WSM API. wsm_hdr is /not/ a caller-adapted struct to be used as an input
@@ -949,9 +924,6 @@ struct wsm_rx {
 /* = sizeof(generic hi hdr) + sizeof(wsm hdr) */
 #define WSM_RX_EXTRA_HEADROOM (16)
 
-typedef void (*wsm_rx_cb) (struct xradio_vif *priv, struct wsm_rx *arg,
-			   struct sk_buff **skb_p);
-
 /* 3.17 */
 struct wsm_event {
 	/* WSM_STATUS_... */
@@ -973,8 +945,6 @@ struct xradio_wsm_event {
 /* 3.18 - 3.22 */
 /* Measurement. Skipped for now. Irrelevent. */
 
-typedef void (*wsm_event_cb) (struct xradio_common *hw_priv,
-			      struct wsm_event *arg);
 
 /* 3.23 */
 struct wsm_join {
@@ -1054,9 +1024,6 @@ int wsm_set_pm(struct xradio_common *hw_priv, const struct wsm_set_pm *arg,
 struct wsm_set_pm_complete {
 	u8 psm;			/* WSM_PSM_... */
 };
-
-typedef void (*wsm_set_pm_complete_cb) (struct xradio_common *hw_priv,
-					struct wsm_set_pm_complete *arg);
 
 /* 3.28 */
 struct wsm_set_bss_params {
@@ -1252,8 +1219,6 @@ struct wsm_switch_channel {
 int wsm_switch_channel(struct xradio_common *hw_priv,
 		       const struct wsm_switch_channel *arg, int if_id);
 
-typedef void (*wsm_channel_switch_cb) (struct xradio_common *hw_priv);
-
 struct wsm_start {
 	/* WSM_START_MODE_... */
 	/* [in] */ u8 mode;
@@ -1310,9 +1275,6 @@ int wsm_start_find(struct xradio_common *hw_priv, int if_id);
 
 int wsm_stop_find(struct xradio_common *hw_priv, int if_id);
 
-typedef void (*wsm_find_complete_cb) (struct xradio_common *hw_priv,
-				      u32 status);
-
 struct wsm_suspend_resume {
 	/* See 3.52 */
 	/* Link ID */
@@ -1327,9 +1289,6 @@ struct wsm_suspend_resume {
 	/* [out] */ int queue;
 	/* [out] */ int if_id;
 };
-
-typedef void (*wsm_suspend_resume_cb) (struct xradio_vif *priv,
-				       struct wsm_suspend_resume *arg);
 
 /* 3.54 Update-IE request. */
 struct wsm_update_ie {
@@ -1354,16 +1313,6 @@ struct wsm_map_link {
 int wsm_map_link(struct xradio_common *hw_priv, const struct wsm_map_link *arg,
 		int if_id);
 
-struct wsm_cbc {
-	wsm_scan_complete_cb scan_complete;
-	wsm_tx_confirm_cb tx_confirm;
-	wsm_rx_cb rx;
-	wsm_event_cb event;
-	wsm_set_pm_complete_cb set_pm_complete;
-	wsm_channel_switch_cb channel_switch;
-	wsm_find_complete_cb find_complete;
-	wsm_suspend_resume_cb suspend_resume;
-};
 #ifdef MCAST_FWDING
 
 /* 3.65	Give Buffer Request */
@@ -1891,9 +1840,10 @@ struct wsm_operational_mode {
 	int performAntDiversity;
 };
 
-#ifdef CONFIG_XRADIO_DEBUGFS
-extern u8 low_pwr_disable;
-#endif
+static const struct wsm_operational_mode defaultoperationalmode = {
+	.power_mode = wsm_power_mode_active,
+	.disableMoreFlagUsage = true,
+};
 
 static inline int wsm_set_operational_mode(struct xradio_common *hw_priv,
 					const struct wsm_operational_mode *arg,
@@ -1901,11 +1851,6 @@ static inline int wsm_set_operational_mode(struct xradio_common *hw_priv,
 {
 	u32 val = arg->power_mode;
 	
-#ifdef CONFIG_XRADIO_DEBUGFS  //add by yangfh for disable low_power mode.
-	if(low_pwr_disable)
-		val = wsm_power_mode_active;
-#endif
-
 	if (arg->disableMoreFlagUsage)
 		val |= BIT(4);
 	if (arg->performAntDiversity)
@@ -2239,28 +2184,6 @@ struct wsm_arp_ipv4_filter {
 	__be32 ipv4Address[WSM_MAX_ARP_IP_ADDRTABLE_ENTRIES];
 } __packed;
 
-#ifdef IPV6_FILTERING
-/* NDP IPv6 filtering */
-struct wsm_ndp_ipv6_filter {
-	__le32 enable;
-	struct in6_addr ipv6Address[WSM_MAX_NDP_IP_ADDRTABLE_ENTRIES];
-} __packed;
-/* IPV6 Addr Filter Info */
-struct wsm_ip6_addr_info {
-	u8 filter_mode;
-	u8 address_mode;
-	u8 Reserved[2];
-	u8 ipv6[16];
-};
-
-/* IPV6 Addr Filter */
-struct wsm_ipv6_filter {
-	u8 numfilter;
-	u8 action_mode;
-	u8 Reserved[2];
-	struct wsm_ip6_addr_info ipv6filter[0];
-} __packed;
-#endif /*IPV6_FILTERING*/
 
 static inline int wsm_set_arp_ipv4_filter(struct xradio_common *hw_priv,
 					  struct wsm_arp_ipv4_filter *fp,
@@ -2269,16 +2192,6 @@ static inline int wsm_set_arp_ipv4_filter(struct xradio_common *hw_priv,
 	return wsm_write_mib(hw_priv, WSM_MIB_ID_ARP_IP_ADDRESSES_TABLE,
 			    fp, sizeof(*fp), if_id);
 }
-
-#ifdef IPV6_FILTERING
-static inline int wsm_set_ndp_ipv6_filter(struct xradio_common *priv,
-					  struct wsm_ndp_ipv6_filter *fp,
-					  int if_id)
-{
-	return wsm_write_mib(priv, WSM_MIB_ID_NS_IP_ADDRESSES_TABLE,
-			    fp, sizeof(*fp), if_id);
-}
-#endif /*IPV6_FILTERING*/
 
 /* P2P Power Save Mode Info - 4.31 */
 struct wsm_p2p_ps_modeinfo {
