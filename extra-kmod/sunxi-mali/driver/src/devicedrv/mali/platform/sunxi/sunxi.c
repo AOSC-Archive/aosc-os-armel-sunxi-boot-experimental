@@ -1,44 +1,40 @@
 
-#include "mali_kernel_linux.h"
 #include <linux/clk.h>
+#include <linux/clkdev.h>
+#include <linux/cma.h>
 #include <linux/delay.h>
+#include <linux/dma-contiguous.h>
 #include <linux/dma-mapping.h>
 #include <linux/io.h>
+#include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/of_address.h>
 #include <linux/of_device.h>
 #include <linux/of_irq.h>
-#include <linux/pm.h>
-#ifdef CONFIG_PM_RUNTIME
+#include <linux/of_reserved_mem.h>
 #include <linux/pm_runtime.h>
-#endif
 #include <linux/reset.h>
 #include <linux/slab.h>
-#include <linux/version.h>
 
 #include <linux/clk/clk-conf.h>
 
 #include <linux/mali/mali_utgard.h>
 
-#define MALI_PP_BASE(pp)	0x8000 + 0x2000 * (pp)
-#define MALI_PP_VERSION_REG	0x1000
+/* This is a hack, really, and should be fixed. Eventually. */
+#include <../mm/cma.h>
 
-#define MALI_GP_VERSION_REG	0x6c
-#define MALI_GP_VERSION_200		0x0a07
-#define MALI_GP_VERSION_300		0x0c07
-#define MALI_GP_VERSION_400		0x0b07
-#define MALI_GP_VERSION_450		0x0d07
+#include "mali_kernel_linux.h"
 
 struct mali {
 	struct clk		*bus_clk;
-	struct clk		*mod_clk;
+	struct clk		*core_clk;
 
 	struct reset_control	*reset;
 
 	struct platform_device	*dev;
 };
 
-struct mali *mali = NULL;
+struct mali *mali;
 
 struct resource *mali_create_mp1_resources(unsigned long address,
 					   int irq_gp, int irq_gpmmu,
@@ -88,43 +84,9 @@ struct resource *mali_create_mp2_resources(unsigned long address,
 	return res;
 }
 
-static int mali_get_core_numbers(void __iomem *regs)
-{
-	int i;
-
-	for (i = 0; i < 4; i++) {
-		u32 val = readl(regs + MALI_PP_BASE(i) + MALI_PP_VERSION_REG);
-		if (!val)
-			break;
-	}
-
-	return i;
-}	
-
-static void mali_print_core_version(void __iomem *regs)
-{
-	unsigned int gpu_model, major, minor;
-	u32 val;
-
-	val = readl(regs + MALI_GP_VERSION_REG);
-	minor = val & 0xff;
-	major = (val >> 8) & 0xff;
-
-	switch (val >> 16) {
-	case MALI_GP_VERSION_400:
-		gpu_model = 400;
-		break;
-
-	default:
-		pr_err("Unrecognized GPU\n");
-		return;
-	}
-
-	pr_info("Found ARM Mali %u MP%d (r%up%u)\n",
-		gpu_model, mali_get_core_numbers(regs), major, minor);
-};
-
-static struct of_device_id mali_dt_ids[] = {
+static const struct of_device_id mali_dt_ids[] = {
+	{ .compatible = "allwinner,sun4i-a10-mali" },
+	{ .compatible = "allwinner,sun7i-a20-mali" },
 	{ .compatible = "arm,mali-400" },
 	{ /* sentinel */ },
 };
@@ -132,14 +94,15 @@ MODULE_DEVICE_TABLE(of, mali_dt_ids);
 
 int mali_platform_device_register(void)
 {
+	struct mali_gpu_device_data mali_gpu_data = { 0 };
 	int irq_gp, irq_gpmmu;
 	int irq_pp0, irq_ppmmu0;
 	int irq_pp1 = -EINVAL, irq_ppmmu1 = -EINVAL;
 	int irq_pmu;
-	int nr_cores;
 	struct resource *mali_res = NULL, res;
 	struct device_node *np;
-	void __iomem *regs;
+	struct device *dev;
+	struct cma *cma;
 	int ret, len;
 
 	np = of_find_matching_node(NULL, mali_dt_ids);
@@ -160,7 +123,7 @@ int mali_platform_device_register(void)
 		goto err_free_mem;
 	}
 
-	mali->bus_clk = of_clk_get_by_name(np, "ahb");
+	mali->bus_clk = of_clk_get_by_name(np, "bus");
 	if (IS_ERR(mali->bus_clk)) {
 		pr_err("Couldn't retrieve our bus clock\n");
 		ret = PTR_ERR(mali->bus_clk);
@@ -168,21 +131,24 @@ int mali_platform_device_register(void)
 	}
 	clk_prepare_enable(mali->bus_clk);
 
-	mali->mod_clk = of_clk_get_by_name(np, "mod");
-	if (IS_ERR(mali->mod_clk)) {
+	mali->core_clk = of_clk_get_by_name(np, "core");
+	if (IS_ERR(mali->core_clk)) {
 		pr_err("Couldn't retrieve our module clock\n");
-		ret = PTR_ERR(mali->mod_clk);
+		ret = PTR_ERR(mali->core_clk);
 		goto err_put_bus;
 	}
-	clk_prepare_enable(mali->mod_clk);
+	clk_prepare_enable(mali->core_clk);
 
-	mali->reset = of_reset_control_get(np, NULL);
-	if (IS_ERR(mali->reset)) {
-		pr_err("Couldn't retrieve our reset handle\n");
-		ret = PTR_ERR(mali->reset);
-		goto err_put_mod;
+	if (of_device_is_compatible(np, "allwinner,sun4i-a10-mali") ||
+	    of_device_is_compatible(np, "allwinner,sun7i-a20-mali")) {
+		mali->reset = of_reset_control_get(np, NULL);
+		if (IS_ERR(mali->reset)) {
+			pr_err("Couldn't retrieve our reset handle\n");
+			ret = PTR_ERR(mali->reset);
+			goto err_put_mod;
+		}
+		reset_control_deassert(mali->reset);
 	}
-	reset_control_deassert(mali->reset);
 
 	ret = of_address_to_resource(np, 0, &res);
 	if (ret) {
@@ -190,65 +156,43 @@ int mali_platform_device_register(void)
 		goto err_put_reset;
 	}
 
-	regs = ioremap(res.start, resource_size(&res));
-	if (!regs) {
-		pr_err("Couldn't map our base address\n");
-		goto err_put_reset;
-	}
-
-	nr_cores = mali_get_core_numbers(regs);
-	if ((nr_cores < 1) || (nr_cores > 2)) {
-		pr_err("Invalid number of GPU cores %d\n", nr_cores);
-		goto err_put_reset;
-	}
-
-	printk("Number of cores %d\n", nr_cores);
-
-	irq_gp = of_irq_get_byname(np, "IRQGP");
+	irq_gp = of_irq_get_byname(np, "gp");
 	if (irq_gp < 0) {
 		pr_err("Couldn't retrieve our GP interrupt\n");
 		ret = irq_gp;
 		goto err_put_reset;
 	}
 
-	irq_gpmmu = of_irq_get_byname(np, "IRQGPMMU");
+	irq_gpmmu = of_irq_get_byname(np, "gpmmu");
 	if (irq_gpmmu < 0) {
 		pr_err("Couldn't retrieve our GP MMU interrupt\n");
 		ret = irq_gpmmu;
 		goto err_put_reset;
 	}
 
-	irq_pp0 = of_irq_get_byname(np, "IRQPP0");
+	irq_pp0 = of_irq_get_byname(np, "pp0");
 	if (irq_pp0 < 0) {
 		pr_err("Couldn't retrieve our PP0 interrupt %d\n", irq_pp0);
 		ret = irq_pp0;
 		goto err_put_reset;
 	}
 
-	irq_ppmmu0 = of_irq_get_byname(np, "IRQPPMMU0");
+	irq_ppmmu0 = of_irq_get_byname(np, "ppmmu0");
 	if (irq_ppmmu0 < 0) {
 		pr_err("Couldn't retrieve our PP0 MMU interrupt\n");
 		ret = irq_ppmmu0;
 		goto err_put_reset;
 	}
 
-	if (nr_cores >= 2) {
-		irq_pp1 = of_irq_get_byname(np, "IRQPP1");
-		if (irq_pp1 < 0) {
-			pr_err("Couldn't retrieve our PP1 interrupt\n");
-			ret = irq_pp1;
-			goto err_put_reset;
-		}
-
-		irq_ppmmu1 = of_irq_get_byname(np, "IRQPPMMU1");
-		if (irq_ppmmu1 < 0) {
-			pr_err("Couldn't retrieve our PP1 MMU interrupt\n");
-			ret = irq_ppmmu1;
-			goto err_put_reset;
-		}
+	irq_pp1 = of_irq_get_byname(np, "pp1");
+	irq_ppmmu1 = of_irq_get_byname(np, "ppmmu1");
+	if ((irq_pp1 < 0) ^ (irq_ppmmu1 < 0 )) {
+		pr_err("Couldn't retrieve our PP1 interrupts\n");
+		ret = (irq_pp1 < 0) ? irq_pp1 : irq_ppmmu1;
+		goto err_put_reset;
 	}
 
-	irq_pmu = of_irq_get_byname(np, "IRQPMU");
+	irq_pmu = of_irq_get_byname(np, "pmu");
 	if (irq_pmu < 0) {
 		pr_err("Couldn't retrieve our PMU interrupt\n");
 		ret = irq_pmu;
@@ -261,45 +205,66 @@ int mali_platform_device_register(void)
 		ret = -EINVAL;
 		goto err_put_reset;
 	}
-	mali->dev->dev.dma_mask = &mali->dev->dev.coherent_dma_mask;
-	mali->dev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
+	dev = &mali->dev->dev;
+	dev_set_name(dev, "mali-utgard");
+	dev->of_node = np;
+	dev->dma_mask = &dev->coherent_dma_mask;
+	dev->coherent_dma_mask = DMA_BIT_MASK(32);
 
-	if (nr_cores == 1)
-		mali_res = mali_create_mp1_resources(res.start,
-						     irq_gp, irq_gpmmu,
-						     irq_pp0, irq_ppmmu0,
-						     &len);
-	else if (nr_cores == 2)
+	ret = of_reserved_mem_device_init(&mali->dev->dev);
+	if (ret < 0) {
+		pr_err("Couldn't reserve our memory region\n");
+		ret = -EINVAL;
+		goto err_free_pdev;
+	}
+
+	cma = dev->cma_area;
+	mali_gpu_data.fb_start = PFN_PHYS(cma->base_pfn);
+	mali_gpu_data.fb_size = cma->count << PAGE_SHIFT;
+	mali_gpu_data.shared_mem_size = cma->count << PAGE_SHIFT;
+
+	if ((irq_pp1 >= 0) && (irq_ppmmu1 >= 0))
 		mali_res = mali_create_mp2_resources(res.start,
 						     irq_gp, irq_gpmmu,
 						     irq_pp0, irq_ppmmu0,
 						     irq_pp1, irq_ppmmu1,
 						     &len);
 	else
-		mali_res = NULL;
+		mali_res = mali_create_mp1_resources(res.start,
+						     irq_gp, irq_gpmmu,
+						     irq_pp0, irq_ppmmu0,
+						     &len);
 
 	if (!mali_res) {
 		pr_err("Couldn't create target resources\n");
 		ret = -EINVAL;
-		goto err_free_pdev;
+		goto err_free_mem_region;
 	}
+
+	clk_register_clkdev(mali->core_clk, "clk_mali", NULL);
 
 	ret = platform_device_add_resources(mali->dev, mali_res, len);
+	kfree(mali_res);
 	if (ret) {
 		pr_err("Couldn't add our resources\n");
-		goto err_free_resources;
+		goto err_free_mem_region;
 	}
 
-	mali_print_core_version(regs);
+	ret = platform_device_add_data(mali->dev, &mali_gpu_data,
+				       sizeof(mali_gpu_data));
+	if (ret) {
+		pr_err("Couldn't add our platform data\n");
+		goto err_free_mem_region;
+	}
 
 	ret = platform_device_add(mali->dev);
 	if (ret) {
 		pr_err("Couldn't add our device\n");
-		goto err_unprepare_clk;
+		goto err_free_mem_region;
 	}
 
 #ifdef CONFIG_PM_RUNTIME
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 37)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 37))
 	pm_runtime_set_autosuspend_delay(&mali->dev->dev, 1000);
 	pm_runtime_use_autosuspend(&mali->dev->dev);
 #endif
@@ -308,24 +273,22 @@ int mali_platform_device_register(void)
 
 	pr_info("Allwinner sunXi mali glue initialized\n");
 
-	iounmap(regs);
-	of_node_put(np);
-
 	return 0;
 
-err_unprepare_clk:
-	clk_disable_unprepare(mali->mod_clk);
-	clk_disable_unprepare(mali->bus_clk);
-	reset_control_assert(mali->reset);
-err_free_resources:
-	kfree(mali_res);
+err_free_mem_region:
+	of_reserved_mem_device_release(dev);
 err_free_pdev:
 	platform_device_put(mali->dev);
 err_put_reset:
-	reset_control_put(mali->reset);
+	if (!IS_ERR_OR_NULL(mali->reset)) {
+		reset_control_assert(mali->reset);
+		reset_control_put(mali->reset);
+	}
 err_put_mod:
-	clk_put(mali->mod_clk);
+	clk_disable_unprepare(mali->core_clk);
+	clk_put(mali->core_clk);
 err_put_bus:
+	clk_disable_unprepare(mali->bus_clk);
 	clk_put(mali->bus_clk);
 err_free_mem:
 	kfree(mali);
@@ -336,17 +299,29 @@ err_put_node:
 
 int mali_platform_device_unregister(void)
 {
+	struct device *dev = &mali->dev->dev;
+
 #ifdef CONFIG_PM_RUNTIME
-	pm_runtime_disable(&mali->dev->dev);
+	pm_runtime_disable(dev);
 #endif
+
+	of_reserved_mem_device_release(dev);
+
 	platform_device_del(mali->dev);
+	of_node_put(dev->of_node);
 	platform_device_put(mali->dev);
-	clk_disable_unprepare(mali->mod_clk);
+
+	if (!IS_ERR_OR_NULL(mali->reset)) {
+		reset_control_assert(mali->reset);
+		reset_control_put(mali->reset);
+	}
+
+	clk_disable_unprepare(mali->core_clk);
+	clk_put(mali->core_clk);
+
 	clk_disable_unprepare(mali->bus_clk);
-	reset_control_assert(mali->reset);
-	reset_control_put(mali->reset);
-	clk_put(mali->mod_clk);
 	clk_put(mali->bus_clk);
+
 	kfree(mali);
 
 	return 0;

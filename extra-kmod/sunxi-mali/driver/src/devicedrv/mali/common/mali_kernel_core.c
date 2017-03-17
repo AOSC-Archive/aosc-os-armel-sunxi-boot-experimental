@@ -43,7 +43,7 @@
 #include "mali_dvfs_policy.h"
 #include <linux/sched.h>
 
-#define MALI_SHARED_MEMORY_DEFAULT_SIZE 0x10000000
+#define MALI_SHARED_MEMORY_DEFAULT_SIZE 0xffffffff
 
 /* Mali GPU memory. Real values come from module parameter or from device specific data */
 unsigned int mali_dedicated_mem_start = 0;
@@ -140,28 +140,28 @@ static _mali_osk_errcode_t mali_parse_product_info(void)
 				switch (pp_version >> 16) {
 				case MALI200_PP_PRODUCT_ID:
 					global_product_id = _MALI_PRODUCT_ID_MALI200;
-					MALI_DEBUG_PRINT(2, ("Found Mali GPU Mali-200 r%up%u\n", global_gpu_major_version, global_gpu_minor_version));
+					MALI_PRINT(("Found Mali GPU Mali-200 r%up%u\n", global_gpu_major_version, global_gpu_minor_version));
 					MALI_PRINT_ERROR(("Mali-200 is not supported by this driver.\n"));
 					_mali_osk_abort();
 					break;
 				case MALI300_PP_PRODUCT_ID:
 					global_product_id = _MALI_PRODUCT_ID_MALI300;
-					MALI_DEBUG_PRINT(2, ("Found Mali GPU Mali-300 r%up%u\n", global_gpu_major_version, global_gpu_minor_version));
+					MALI_PRINT(("Found Mali GPU Mali-300 r%up%u\n", global_gpu_major_version, global_gpu_minor_version));
 					break;
 				case MALI400_PP_PRODUCT_ID:
 					global_product_id = _MALI_PRODUCT_ID_MALI400;
-					MALI_DEBUG_PRINT(2, ("Found Mali GPU Mali-400 MP r%up%u\n", global_gpu_major_version, global_gpu_minor_version));
+					MALI_PRINT(("Found Mali GPU Mali-400 MP r%up%u\n", global_gpu_major_version, global_gpu_minor_version));
 					break;
 				case MALI450_PP_PRODUCT_ID:
 					global_product_id = _MALI_PRODUCT_ID_MALI450;
-					MALI_DEBUG_PRINT(2, ("Found Mali GPU Mali-450 MP r%up%u\n", global_gpu_major_version, global_gpu_minor_version));
+					MALI_PRINT(("Found Mali GPU Mali-450 MP r%up%u\n", global_gpu_major_version, global_gpu_minor_version));
 					break;
 				case MALI470_PP_PRODUCT_ID:
 					global_product_id = _MALI_PRODUCT_ID_MALI470;
-					MALI_DEBUG_PRINT(2, ("Found Mali GPU Mali-470 MP r%up%u\n", global_gpu_major_version, global_gpu_minor_version));
+					MALI_PRINT(("Found Mali GPU Mali-470 MP r%up%u\n", global_gpu_major_version, global_gpu_minor_version));
 					break;
 				default:
-					MALI_DEBUG_PRINT(2, ("Found unknown Mali GPU (r%up%u)\n", global_gpu_major_version, global_gpu_minor_version));
+					MALI_PRINT(("Found unknown Mali GPU (r%up%u)\n", global_gpu_major_version, global_gpu_minor_version));
 					return _MALI_OSK_ERR_FAULT;
 				}
 
@@ -584,7 +584,7 @@ static _mali_osk_errcode_t mali_parse_config_groups(void)
 
 	mali_max_pp_cores_group_1 = mali_inited_pp_cores_group_1;
 	mali_max_pp_cores_group_2 = mali_inited_pp_cores_group_2;
-	MALI_DEBUG_PRINT(2, ("%d+%d PP cores initialized\n", mali_inited_pp_cores_group_1, mali_inited_pp_cores_group_2));
+	MALI_PRINT(("%d+%d PP cores initialized\n", mali_inited_pp_cores_group_1, mali_inited_pp_cores_group_2));
 
 	return _MALI_OSK_ERR_OK;
 }
