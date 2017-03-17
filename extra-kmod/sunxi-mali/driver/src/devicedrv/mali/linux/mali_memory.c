@@ -54,8 +54,14 @@ static void mali_mem_vma_close(struct vm_area_struct *vma)
 	vma->vm_private_data = NULL;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+static int mali_mem_vma_fault(struct vm_fault *vmf)
+{
+	struct vm_area_struct *vma = vmf->vma;
+#else
 static int mali_mem_vma_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
 {
+#endif
 	mali_mem_allocation *alloc = (mali_mem_allocation *)vma->vm_private_data;
 	mali_mem_backend *mem_bkend = NULL;
 	int ret;
