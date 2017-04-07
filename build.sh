@@ -41,6 +41,7 @@ do
 	done
 	mkdir -p "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"
 	make "${UBOOT_CNAME}"_defconfig > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/config.log 2>&1
+	sed -i 's/# CONFIG_OF_LIBFDT_OVERLAY is not set/CONFIG_OF_LIBFDT_OVERLAY=y/g' .config # Configure fdt overlay command
 	echo "Configured"
 	make CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- -j$(nproc) > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/build.log 2>&1
 	echo "Built"
@@ -69,7 +70,7 @@ if [ "$BUILD_LINUX" != "0" ]; then
 	cp ../sunxi-nokvm-config .config
 	echo "Configured"
 	# FIXME: hard coded parallel.
-	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- -j$(nproc) > "$LOG_DIR"/linux-sunxi-nokvm/build.log 2>&1
+	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- DTC_FLAGS=-@ -j$(nproc) > "$LOG_DIR"/linux-sunxi-nokvm/build.log 2>&1
 	echo "Built"
 	TMPDIR=$(mktemp -d)
 	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- INSTALL_MOD_PATH="$TMPDIR" modules_install > "$LOG_DIR"/linux-sunxi-nokvm/modules_install.log 2>&1
@@ -95,7 +96,7 @@ if [ "$BUILD_LINUX" != "0" ]; then
 	mkdir -p "$LOG_DIR"/linux-sunxi-kvm
 	cp ../sunxi-kvm-config .config
 	echo "Configured"
-	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- -j$(nproc) > "$LOG_DIR"/linux-sunxi-kvm/build.log 2>&1
+	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- DTC_FLAGS=-@ -j$(nproc) > "$LOG_DIR"/linux-sunxi-kvm/build.log 2>&1
 	echo "Built"
 	TMPDIR=$(mktemp -d)
 	make ARCH=arm CROSS_COMPILE=/opt/abcross/armel/bin/armv7a-aosc-linux-gnueabihf- INSTALL_MOD_PATH="$TMPDIR" modules_install > "$LOG_DIR"/linux-sunxi-kvm/modules_install.log 2>&1
