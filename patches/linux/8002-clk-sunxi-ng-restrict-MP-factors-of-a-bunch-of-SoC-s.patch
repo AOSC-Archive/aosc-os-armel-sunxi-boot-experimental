@@ -1,0 +1,124 @@
+From f00535ede3211683ac1c01c10e77e3bc96bdf9ba Mon Sep 17 00:00:00 2001
+From: Icenowy Zheng <icenowy@aosc.io>
+Date: Sun, 9 Apr 2017 23:28:56 +0800
+Subject: [PATCH] clk: sunxi-ng: restrict MP factors of a bunch of SoC's PLL1
+ clk
+
+According to some research did by Ondrej Jirman and the BSP source's
+clk-sun*_tbl.c, the M factor of PLL_CPU(X) should never be used and the
+P factor should only be used when the frequency is lower than 288MHz.
+
+Restrict the factors' maximum value to 1 in order to prevent
+instability.
+
+Signed-off-by: Icenowy Zheng <icenowy@aosc.io>
+---
+ drivers/clk/sunxi-ng/ccu-sun50i-a64.c |  4 ++--
+ drivers/clk/sunxi-ng/ccu-sun8i-a33.c  |  4 ++--
+ drivers/clk/sunxi-ng/ccu-sun8i-h3.c   | 24 +++++++++++++++---------
+ drivers/clk/sunxi-ng/ccu-sun8i-v3s.c  | 24 +++++++++++++++---------
+ 4 files changed, 34 insertions(+), 22 deletions(-)
+
+diff --git a/drivers/clk/sunxi-ng/ccu-sun50i-a64.c b/drivers/clk/sunxi-ng/ccu-sun50i-a64.c
+index f54114c607df..55b80f2d024e 100644
+--- a/drivers/clk/sunxi-ng/ccu-sun50i-a64.c
++++ b/drivers/clk/sunxi-ng/ccu-sun50i-a64.c
+@@ -35,8 +35,8 @@ static struct ccu_nkmp pll_cpux_clk = {
+ 	.lock		= BIT(28),
+ 	.n		= _SUNXI_CCU_MULT(8, 5),
+ 	.k		= _SUNXI_CCU_MULT(4, 2),
+-	.m		= _SUNXI_CCU_DIV(0, 2),
+-	.p		= _SUNXI_CCU_DIV_MAX(16, 2, 4),
++	.m		= _SUNXI_CCU_DIV_MAX(0, 2, 1),
++	.p		= _SUNXI_CCU_DIV_MAX(16, 2, 1),
+ 	.common		= {
+ 		.reg		= 0x000,
+ 		.hw.init	= CLK_HW_INIT("pll-cpux",
+diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-a33.c b/drivers/clk/sunxi-ng/ccu-sun8i-a33.c
+index 56370c2c7f98..cc6f421a3195 100644
+--- a/drivers/clk/sunxi-ng/ccu-sun8i-a33.c
++++ b/drivers/clk/sunxi-ng/ccu-sun8i-a33.c
+@@ -35,8 +35,8 @@ static struct ccu_nkmp pll_cpux_clk = {
+ 
+ 	.n	= _SUNXI_CCU_MULT(8, 5),
+ 	.k	= _SUNXI_CCU_MULT(4, 2),
+-	.m	= _SUNXI_CCU_DIV(0, 2),
+-	.p	= _SUNXI_CCU_DIV_MAX(16, 2, 4),
++	.m	= _SUNXI_CCU_DIV_MAX(0, 2, 1),
++	.p	= _SUNXI_CCU_DIV_MAX(16, 2, 1),
+ 
+ 	.common	= {
+ 		.reg		= 0x000,
+diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-h3.c b/drivers/clk/sunxi-ng/ccu-sun8i-h3.c
+index 90b4e26a70bc..29647e288588 100644
+--- a/drivers/clk/sunxi-ng/ccu-sun8i-h3.c
++++ b/drivers/clk/sunxi-ng/ccu-sun8i-h3.c
+@@ -29,15 +29,21 @@
+ 
+ #include "ccu-sun8i-h3.h"
+ 
+-static SUNXI_CCU_NKMP_WITH_GATE_LOCK(pll_cpux_clk, "pll-cpux",
+-				     "osc24M", 0x000,
+-				     8, 5,	/* N */
+-				     4, 2,	/* K */
+-				     0, 2,	/* M */
+-				     16, 2,	/* P */
+-				     BIT(31),	/* gate */
+-				     BIT(28),	/* lock */
+-				     0);
++static struct ccu_nkmp pll_cpux_clk = {
++	.enable		= BIT(31),
++	.lock		= BIT(28),
++	.n		= _SUNXI_CCU_MULT(8, 5),
++	.k		= _SUNXI_CCU_MULT(4, 2),
++	.m		= _SUNXI_CCU_DIV_MAX(0, 2, 1),
++	.p		= _SUNXI_CCU_DIV_MAX(16, 2, 1),
++	.common		= {
++		.reg		= 0x000,
++		.hw.init	= CLK_HW_INIT("pll-cpux",
++					      "osc24M",
++					      &ccu_nkmp_ops,
++					      0),
++	},
++};
+ 
+ /*
+  * The Audio PLL is supposed to have 4 outputs: 3 fixed factors from
+diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-v3s.c b/drivers/clk/sunxi-ng/ccu-sun8i-v3s.c
+index e58706b40ae9..d4424ea01b21 100644
+--- a/drivers/clk/sunxi-ng/ccu-sun8i-v3s.c
++++ b/drivers/clk/sunxi-ng/ccu-sun8i-v3s.c
+@@ -32,15 +32,21 @@
+ 
+ #include "ccu-sun8i-v3s.h"
+ 
+-static SUNXI_CCU_NKMP_WITH_GATE_LOCK(pll_cpu_clk, "pll-cpu",
+-				     "osc24M", 0x000,
+-				     8, 5,	/* N */
+-				     4, 2,	/* K */
+-				     0, 2,	/* M */
+-				     16, 2,	/* P */
+-				     BIT(31),	/* gate */
+-				     BIT(28),	/* lock */
+-				     0);
++static struct ccu_nkmp pll_cpu_clk = {
++	.enable		= BIT(31),
++	.lock		= BIT(28),
++	.n		= _SUNXI_CCU_MULT(8, 5),
++	.k		= _SUNXI_CCU_MULT(4, 2),
++	.m		= _SUNXI_CCU_DIV_MAX(0, 2, 1),
++	.p		= _SUNXI_CCU_DIV_MAX(16, 2, 1),
++	.common		= {
++		.reg		= 0x000,
++		.hw.init	= CLK_HW_INIT("pll-cpux",
++					      "osc24M",
++					      &ccu_nkmp_ops,
++					      0),
++	},
++};
+ 
+ /*
+  * The Audio PLL is supposed to have 4 outputs: 3 fixed factors from
+-- 
+2.12.2
+
