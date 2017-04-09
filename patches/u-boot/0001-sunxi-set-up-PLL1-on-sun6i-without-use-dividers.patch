@@ -1,0 +1,50 @@
+From aa529803c7aa9cb70cd84fed39e8dcf1ec6b06b4 Mon Sep 17 00:00:00 2001
+From: Icenowy Zheng <icenowy@aosc.io>
+Date: Tue, 20 Dec 2016 11:25:12 +0100
+Subject: [PATCH] sunxi: set up PLL1 on sun6i+ without use dividers
+
+According to the researching result of Ondrej Jirman, the factor M of
+PLL1 shouldn't be used and the factor P should be used only if the
+intended frequency is lower than 288MHz. This is proven by the
+clk-sun8iw7_tbl.c in the BSP source code -- in there the M value is
+always 0 and the maximum frequency that P is not 0 is 224MHz.
+
+As P is ignored on sun6i, it's not currently used. This patch removed
+the usage of M.
+
+This patch is an original work by Ondrej Jirman, however, he didn't add
+a Signed-off-by tag here to his commit. So I take this code and added my
+Signed-off-by.
+
+Signed-off-by: Icenowy Zheng <icenowy@aosc.io>
+---
+
+This is a critical patch, and should be added to 2017.05.
+
+It has been verified by the Armbian.
+
+ arch/arm/mach-sunxi/clock_sun6i.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/mach-sunxi/clock_sun6i.c b/arch/arm/mach-sunxi/clock_sun6i.c
+index 4762fbf0c3..ce4291b30e 100644
+--- a/arch/arm/mach-sunxi/clock_sun6i.c
++++ b/arch/arm/mach-sunxi/clock_sun6i.c
+@@ -98,11 +98,10 @@ void clock_set_pll1(unsigned int clk)
+ 	int k = 1;
+ 	int m = 1;
+ 
+-	if (clk > 1152000000) {
+-		k = 2;
+-	} else if (clk > 768000000) {
++	if (clk >= 1368000000) {
+ 		k = 3;
+-		m = 2;
++	} else if (clk >= 768000000) {
++		k = 2;
+ 	}
+ 
+ 	/* Switch to 24MHz clock while changing PLL1 */
+-- 
+2.12.2
+
