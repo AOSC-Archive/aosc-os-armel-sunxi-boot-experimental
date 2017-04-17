@@ -15,8 +15,8 @@ Backported to 4.8 by Icenowy for AOSC OS ARMEL sunxi boot.
 
  drivers/mfd/axp20x.c                  |  28 ++++
  drivers/power/supply/Makefile         |   1 +
- drivers/power/supply/axp20x_battery.c | 277 ++++++++++++++++++++++++++++++++++
- 3 files changed, 306 insertions(+)
+ drivers/power/supply/axp20x_battery.c | 278 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 307 insertions(+)
  create mode 100644 drivers/power/supply/axp20x_battery.c
 
 diff --git a/drivers/mfd/axp20x.c b/drivers/mfd/axp20x.c
@@ -96,7 +96,7 @@ new file mode 100644
 index 0000000..67ee58f
 --- /dev/null
 +++ b/drivers/power/supply/axp20x_battery.c
-@@ -0,0 +1,277 @@
+@@ -0,0 +1,278 @@
 +/*
 + * AXP20x PMIC battery status driver
 + *
@@ -357,6 +357,7 @@ index 0000000..67ee58f
 +
 +static const struct of_device_id axp20x_battery_match[] = {
 +	{ .compatible = "x-powers,axp202-battery" },
++	{ .compatible = "x-powers,axp221-battery" },
 +	{ }
 +};
 +MODULE_DEVICE_TABLE(of, axp20x_battery_match);
