@@ -1,0 +1,9 @@
+diff -Naur u-boot-2017.05-rc1.hacked/configs/nanopi_neo_defconfig u-boot-2017.05-rc1/configs/nanopi_neo_defconfig
+--- u-boot-2017.05-rc1.hacked/configs/nanopi_neo_defconfig	2017-04-05 05:53:24.000000000 +0800
++++ u-boot-2017.05-rc1/configs/nanopi_neo_defconfig	2017-04-24 12:34:04.418438030 +0800
+@@ -15,4 +15,5 @@
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_SUN8I_EMAC=y
++CONFIG_SYS_CLK_FREQ=816000000
+ CONFIG_USB_EHCI_HCD=y
