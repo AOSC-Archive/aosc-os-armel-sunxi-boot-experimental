@@ -7,9 +7,11 @@
 echo "Checking whether the sources tarball is unique..."
 if [ "$(echo linux-*.tar.* | wc -w)" != "1" ]; then
 	echo "More than one linux kernel sources. Exit."
+	exit 1
 fi
 if [ "$(echo u-boot-*.tar.* | wc -w)" != "1" ]; then
 	echo "More than one u-boot sources. Exit."
+	exit 1
 fi
 LINUX_SRC="$(echo linux-*.tar.*)"
 UBOOT_SRC="$(echo u-boot-*.tar.*)"
