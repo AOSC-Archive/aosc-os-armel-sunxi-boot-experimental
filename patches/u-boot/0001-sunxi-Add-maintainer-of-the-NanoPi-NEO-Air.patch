@@ -1,0 +1,32 @@
+From 27f31aac1579fe7506bde26d45d082cb18f9228a Mon Sep 17 00:00:00 2001
+From: Jelle van der Waa <jelle@vdwaa.nl>
+Date: Fri, 3 Mar 2017 21:25:10 +0100
+Subject: [PATCH 01/41] sunxi: Add maintainer of the NanoPi NEO Air
+
+Add myself as maintainer of the NanoPi NEO Air board.
+
+Signed-off-by: Jelle van der Waa <jelle@vdwaa.nl>
+Reviewed-by: Jagan Teki <jagan@openedev.com>
+---
+ board/sunxi/MAINTAINERS | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/board/sunxi/MAINTAINERS b/board/sunxi/MAINTAINERS
+index 91ca6eaf7a..2a712fe4b5 100644
+--- a/board/sunxi/MAINTAINERS
++++ b/board/sunxi/MAINTAINERS
+@@ -232,6 +232,11 @@ M:	Jelle van der Waa <jelle@vdwaa.nl>
+ S:	Maintained
+ F:	configs/nanopi_neo_defconfig
+ 
++NANOPI-NEO-AIR BOARD
++M:	Jelle van der Waa <jelle@vdwaa.nl>
++S:	Maintained
++F:	configs/nanopi_neo_air_defconfig
++
+ NINTENDO NES CLASSIC EDITION BOARD
+ M:	FUKAUMI Naoki <naobsd@gmail.com>
+ S:	Maintained
+-- 
+2.12.2
+

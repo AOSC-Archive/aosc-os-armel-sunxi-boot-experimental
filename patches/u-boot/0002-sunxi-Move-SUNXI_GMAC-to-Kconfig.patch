@@ -1,0 +1,615 @@
+From 4d43d065db3262f9a9918ba72457bf36dfb8e0bb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Myl=C3=A8ne=20Josserand?=
+ <mylene.josserand@free-electrons.com>
+Date: Sun, 2 Apr 2017 12:59:03 +0200
+Subject: [PATCH 02/41] sunxi: Move SUNXI_GMAC to Kconfig
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Move the SUNXI_GMAC config option to Kconfig, remove it
+from SYS_EXTRA_OPTIONS and rename it into SUN7I_GMAC.
+
+Signed-off-by: Mylène Josserand <mylene.josserand@free-electrons.com>
+Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+---
+ configs/A20-OLinuXino-Lime2_defconfig      | 3 ++-
+ configs/A20-OLinuXino-Lime_defconfig       | 3 ++-
+ configs/A20-OLinuXino_MICRO_defconfig      | 3 ++-
+ configs/A20-Olimex-SOM-EVB_defconfig       | 3 ++-
+ configs/Bananapi_defconfig                 | 3 ++-
+ configs/Bananapro_defconfig                | 3 ++-
+ configs/CSQ_CS908_defconfig                | 2 +-
+ configs/Colombus_defconfig                 | 3 ++-
+ configs/Cubieboard2_defconfig              | 3 ++-
+ configs/Cubietruck_defconfig               | 3 ++-
+ configs/Hummingbird_A31_defconfig          | 3 ++-
+ configs/Itead_Ibox_A20_defconfig           | 3 ++-
+ configs/Lamobo_R1_defconfig                | 3 ++-
+ configs/Linksprite_pcDuino3_Nano_defconfig | 3 ++-
+ configs/Linksprite_pcDuino3_defconfig      | 3 ++-
+ configs/Mele_A1000G_quad_defconfig         | 2 +-
+ configs/Mele_I7_defconfig                  | 2 +-
+ configs/Mele_M3_defconfig                  | 2 +-
+ configs/Mele_M5_defconfig                  | 2 +-
+ configs/Mele_M9_defconfig                  | 2 +-
+ configs/Orangepi_defconfig                 | 3 ++-
+ configs/Orangepi_mini_defconfig            | 3 ++-
+ configs/Sinlinx_SinA31s_defconfig          | 2 +-
+ configs/Sinovoip_BPI_M2_defconfig          | 3 ++-
+ configs/Wits_Pro_A20_DKT_defconfig         | 3 ++-
+ configs/i12-tvbox_defconfig                | 3 ++-
+ configs/icnova-a20-swac_defconfig          | 3 ++-
+ configs/mixtile_loftq_defconfig            | 3 ++-
+ drivers/net/Kconfig                        | 5 +++++
+ 29 files changed, 54 insertions(+), 28 deletions(-)
+
+diff --git a/configs/A20-OLinuXino-Lime2_defconfig b/configs/A20-OLinuXino-Lime2_defconfig
+index 4c720b3109..8883cf182d 100644
+--- a/configs/A20-OLinuXino-Lime2_defconfig
++++ b/configs/A20-OLinuXino-Lime2_defconfig
+@@ -8,7 +8,7 @@ CONFIG_USB0_VBUS_DET="PH5"
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-olinuxino-lime2"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII,SATAPWR=SUNXI_GPC(3)"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII,SATAPWR=SUNXI_GPC(3)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -25,6 +25,7 @@ CONFIG_NET_ETHADDR_EEPROM=y
+ CONFIG_NET_ETHADDR_EEPROM_I2C=y
+ CONFIG_NET_ETHADDR_EEPROM_I2C_BUS=1
+ CONFIG_I2C1_ENABLE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_ALDO3_VOLT=2800
+ CONFIG_AXP_ALDO4_VOLT=2800
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/A20-OLinuXino-Lime_defconfig b/configs/A20-OLinuXino-Lime_defconfig
+index 564ae256a3..d83fc2b403 100644
+--- a/configs/A20-OLinuXino-Lime_defconfig
++++ b/configs/A20-OLinuXino-Lime_defconfig
+@@ -6,7 +6,7 @@ CONFIG_MMC0_CD_PIN="PH1"
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-olinuxino-lime"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,SATAPWR=SUNXI_GPC(3)"
++CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPC(3)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -20,6 +20,7 @@ CONFIG_NET_ETHADDR_EEPROM=y
+ CONFIG_NET_ETHADDR_EEPROM_I2C=y
+ CONFIG_NET_ETHADDR_EEPROM_I2C_BUS=1
+ CONFIG_I2C1_ENABLE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_ALDO3_VOLT=2800
+ CONFIG_AXP_ALDO4_VOLT=2800
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/A20-OLinuXino_MICRO_defconfig b/configs/A20-OLinuXino_MICRO_defconfig
+index 93be13b407..c25556bdac 100644
+--- a/configs/A20-OLinuXino_MICRO_defconfig
++++ b/configs/A20-OLinuXino_MICRO_defconfig
+@@ -9,7 +9,7 @@ CONFIG_VIDEO_VGA=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-olinuxino-micro"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,SATAPWR=SUNXI_GPB(8)"
++CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPB(8)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -23,6 +23,7 @@ CONFIG_NET_ETHADDR_EEPROM=y
+ CONFIG_NET_ETHADDR_EEPROM_I2C=y
+ CONFIG_NET_ETHADDR_EEPROM_I2C_BUS=1
+ CONFIG_I2C1_ENABLE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_ALDO3_VOLT=2800
+ CONFIG_AXP_ALDO4_VOLT=2800
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/A20-Olimex-SOM-EVB_defconfig b/configs/A20-Olimex-SOM-EVB_defconfig
+index b835dc59b9..9cb30c0c58 100644
+--- a/configs/A20-Olimex-SOM-EVB_defconfig
++++ b/configs/A20-Olimex-SOM-EVB_defconfig
+@@ -11,7 +11,7 @@ CONFIG_USB0_VBUS_DET="PH5"
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-olimex-som-evb"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII,SATAPWR=SUNXI_GPC(3)"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII,SATAPWR=SUNXI_GPC(3)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -21,6 +21,7 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_ALDO3_VOLT=2800
+ CONFIG_AXP_ALDO4_VOLT=2800
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Bananapi_defconfig b/configs/Bananapi_defconfig
+index 059559d393..c780d6383c 100644
+--- a/configs/Bananapi_defconfig
++++ b/configs/Bananapi_defconfig
+@@ -7,7 +7,7 @@ CONFIG_GMAC_TX_DELAY=3
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-bananapi"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII,MACPWR=SUNXI_GPH(23)"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII,MACPWR=SUNXI_GPH(23)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -18,4 +18,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_NETCONSOLE=y
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Bananapro_defconfig b/configs/Bananapro_defconfig
+index 27b9e63e00..5dd3088d3d 100644
+--- a/configs/Bananapro_defconfig
++++ b/configs/Bananapro_defconfig
+@@ -9,7 +9,7 @@ CONFIG_GMAC_TX_DELAY=3
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-bananapro"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII,MACPWR=SUNXI_GPH(23)"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII,MACPWR=SUNXI_GPH(23)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -20,5 +20,6 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_NETCONSOLE=y
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_ALDO4_VOLT=2500
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/CSQ_CS908_defconfig b/configs/CSQ_CS908_defconfig
+index 953ec253c0..a6fcbf5ecf 100644
+--- a/configs/CSQ_CS908_defconfig
++++ b/configs/CSQ_CS908_defconfig
+@@ -6,7 +6,6 @@ CONFIG_USB1_VBUS_PIN=""
+ CONFIG_USB2_VBUS_PIN=""
+ CONFIG_DEFAULT_DEVICE_TREE="sun6i-a31s-cs908"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC"
+ CONFIG_SPL=y
+ # CONFIG_CMD_IMLS is not set
+ # CONFIG_CMD_FLASH is not set
+@@ -15,6 +14,7 @@ CONFIG_SPL=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_ALDO1_VOLT=3300
+ CONFIG_AXP_DLDO1_VOLT=3300
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Colombus_defconfig b/configs/Colombus_defconfig
+index ac283a2070..1e7d4982c0 100644
+--- a/configs/Colombus_defconfig
++++ b/configs/Colombus_defconfig
+@@ -16,7 +16,7 @@ CONFIG_VIDEO_LCD_PANEL_I2C_SCL="PA24"
+ CONFIG_VIDEO_LCD_PANEL_EDP_4_LANE_1620M_VIA_ANX9804=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun6i-a31-colombus"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII"
+ CONFIG_SPL=y
+ # CONFIG_CMD_IMLS is not set
+ # CONFIG_CMD_FLASH is not set
+@@ -25,5 +25,6 @@ CONFIG_SPL=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_ALDO1_VOLT=3300
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Cubieboard2_defconfig b/configs/Cubieboard2_defconfig
+index 690ba49cfc..8968623ec5 100644
+--- a/configs/Cubieboard2_defconfig
++++ b/configs/Cubieboard2_defconfig
+@@ -6,7 +6,7 @@ CONFIG_MMC0_CD_PIN="PH1"
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-cubieboard2"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,SATAPWR=SUNXI_GPB(8)"
++CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPB(8)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -16,4 +16,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Cubietruck_defconfig b/configs/Cubietruck_defconfig
+index ca549bc298..576ccc3a20 100644
+--- a/configs/Cubietruck_defconfig
++++ b/configs/Cubietruck_defconfig
+@@ -11,7 +11,7 @@ CONFIG_GMAC_TX_DELAY=1
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-cubietruck"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII,SATAPWR=SUNXI_GPH(12)"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII,SATAPWR=SUNXI_GPH(12)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -24,6 +24,7 @@ CONFIG_CMD_USB_MASS_STORAGE=y
+ # CONFIG_SPL_PARTITION_UUIDS is not set
+ CONFIG_DFU_RAM=y
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+ CONFIG_USB_MUSB_GADGET=y
+ CONFIG_USB_GADGET=y
+diff --git a/configs/Hummingbird_A31_defconfig b/configs/Hummingbird_A31_defconfig
+index c1cbbc829a..d5de518456 100644
+--- a/configs/Hummingbird_A31_defconfig
++++ b/configs/Hummingbird_A31_defconfig
+@@ -8,7 +8,7 @@ CONFIG_VIDEO_VGA_VIA_LCD=y
+ CONFIG_VIDEO_VGA_EXTERNAL_DAC_EN="PH25"
+ CONFIG_DEFAULT_DEVICE_TREE="sun6i-a31-hummingbird"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII"
+ CONFIG_SPL=y
+ # CONFIG_CMD_IMLS is not set
+ # CONFIG_CMD_FLASH is not set
+@@ -17,5 +17,6 @@ CONFIG_SPL=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_ALDO1_VOLT=3300
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Itead_Ibox_A20_defconfig b/configs/Itead_Ibox_A20_defconfig
+index c38d71f25a..bba0c5973b 100644
+--- a/configs/Itead_Ibox_A20_defconfig
++++ b/configs/Itead_Ibox_A20_defconfig
+@@ -6,7 +6,7 @@ CONFIG_MMC0_CD_PIN="PH1"
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-itead-ibox"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,SATAPWR=SUNXI_GPB(8)"
++CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPB(8)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -16,4 +16,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Lamobo_R1_defconfig b/configs/Lamobo_R1_defconfig
+index 92ae4e231d..142ed183eb 100644
+--- a/configs/Lamobo_R1_defconfig
++++ b/configs/Lamobo_R1_defconfig
+@@ -7,7 +7,7 @@ CONFIG_GMAC_TX_DELAY=4
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-lamobo-r1"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII,MACPWR=SUNXI_GPH(23),SATAPWR=SUNXI_GPB(3)"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII,MACPWR=SUNXI_GPH(23),SATAPWR=SUNXI_GPB(3)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -17,4 +17,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Linksprite_pcDuino3_Nano_defconfig b/configs/Linksprite_pcDuino3_Nano_defconfig
+index 9c2cf8129f..dd84b6ec51 100644
+--- a/configs/Linksprite_pcDuino3_Nano_defconfig
++++ b/configs/Linksprite_pcDuino3_Nano_defconfig
+@@ -8,7 +8,7 @@ CONFIG_GMAC_TX_DELAY=3
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-pcduino3-nano"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII,SATAPWR=SUNXI_GPH(2)"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII,SATAPWR=SUNXI_GPH(2)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -18,4 +18,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Linksprite_pcDuino3_defconfig b/configs/Linksprite_pcDuino3_defconfig
+index b245e7e0d7..8e8455eee4 100644
+--- a/configs/Linksprite_pcDuino3_defconfig
++++ b/configs/Linksprite_pcDuino3_defconfig
+@@ -6,7 +6,7 @@ CONFIG_DRAM_ZQ=122
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-pcduino3"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,SATAPWR=SUNXI_GPH(2)"
++CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPH(2)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -16,4 +16,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Mele_A1000G_quad_defconfig b/configs/Mele_A1000G_quad_defconfig
+index 8f03835375..5b1b5f5d7c 100644
+--- a/configs/Mele_A1000G_quad_defconfig
++++ b/configs/Mele_A1000G_quad_defconfig
+@@ -7,7 +7,6 @@ CONFIG_USB1_VBUS_PIN="PC27"
+ CONFIG_USB2_VBUS_PIN=""
+ CONFIG_DEFAULT_DEVICE_TREE="sun6i-a31-mele-a1000g-quad"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC"
+ CONFIG_SPL=y
+ # CONFIG_CMD_IMLS is not set
+ # CONFIG_CMD_FLASH is not set
+@@ -16,6 +15,7 @@ CONFIG_SPL=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_DCDC1_VOLT=3300
+ CONFIG_AXP_ALDO1_VOLT=3300
+ CONFIG_AXP_DLDO1_VOLT=3300
+diff --git a/configs/Mele_I7_defconfig b/configs/Mele_I7_defconfig
+index 572b5219cc..b60969787c 100644
+--- a/configs/Mele_I7_defconfig
++++ b/configs/Mele_I7_defconfig
+@@ -6,7 +6,6 @@ CONFIG_USB1_VBUS_PIN="PC27"
+ CONFIG_USB2_VBUS_PIN=""
+ CONFIG_DEFAULT_DEVICE_TREE="sun6i-a31-i7"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC"
+ CONFIG_SPL=y
+ # CONFIG_CMD_IMLS is not set
+ # CONFIG_CMD_FLASH is not set
+@@ -15,6 +14,7 @@ CONFIG_SPL=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_DCDC1_VOLT=3300
+ CONFIG_AXP_ALDO1_VOLT=3300
+ CONFIG_AXP_DLDO1_VOLT=3300
+diff --git a/configs/Mele_M3_defconfig b/configs/Mele_M3_defconfig
+index dd1526954b..08e8c2dbde 100644
+--- a/configs/Mele_M3_defconfig
++++ b/configs/Mele_M3_defconfig
+@@ -8,7 +8,6 @@ CONFIG_VIDEO_VGA=y
+ CONFIG_VIDEO_COMPOSITE=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-m3"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -18,4 +17,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Mele_M5_defconfig b/configs/Mele_M5_defconfig
+index 12e1d0cae4..4c377e3daf 100644
+--- a/configs/Mele_M5_defconfig
++++ b/configs/Mele_M5_defconfig
+@@ -8,7 +8,6 @@ CONFIG_VIDEO_COMPOSITE=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-m5"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -18,4 +17,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Mele_M9_defconfig b/configs/Mele_M9_defconfig
+index a9dc159063..dc7901f9af 100644
+--- a/configs/Mele_M9_defconfig
++++ b/configs/Mele_M9_defconfig
+@@ -6,7 +6,6 @@ CONFIG_USB1_VBUS_PIN="PC27"
+ CONFIG_USB2_VBUS_PIN=""
+ CONFIG_DEFAULT_DEVICE_TREE="sun6i-a31-m9"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC"
+ CONFIG_SPL=y
+ # CONFIG_CMD_IMLS is not set
+ # CONFIG_CMD_FLASH is not set
+@@ -15,6 +14,7 @@ CONFIG_SPL=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_DCDC1_VOLT=3300
+ CONFIG_AXP_ALDO1_VOLT=3300
+ CONFIG_AXP_DLDO1_VOLT=3300
+diff --git a/configs/Orangepi_defconfig b/configs/Orangepi_defconfig
+index 3c9f74f3b4..43765c697e 100644
+--- a/configs/Orangepi_defconfig
++++ b/configs/Orangepi_defconfig
+@@ -10,7 +10,7 @@ CONFIG_GMAC_TX_DELAY=3
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-orangepi"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII,MACPWR=SUNXI_GPH(23)"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII,MACPWR=SUNXI_GPH(23)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -20,4 +20,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Orangepi_mini_defconfig b/configs/Orangepi_mini_defconfig
+index f1d413b445..772c00f7d1 100644
+--- a/configs/Orangepi_mini_defconfig
++++ b/configs/Orangepi_mini_defconfig
+@@ -12,7 +12,7 @@ CONFIG_GMAC_TX_DELAY=3
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-orangepi-mini"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII,MACPWR=SUNXI_GPH(23)"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII,MACPWR=SUNXI_GPH(23)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -22,4 +22,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Sinlinx_SinA31s_defconfig b/configs/Sinlinx_SinA31s_defconfig
+index 54c975a2b2..7f815a32cb 100644
+--- a/configs/Sinlinx_SinA31s_defconfig
++++ b/configs/Sinlinx_SinA31s_defconfig
+@@ -10,7 +10,6 @@ CONFIG_USB1_VBUS_PIN=""
+ CONFIG_USB2_VBUS_PIN=""
+ CONFIG_DEFAULT_DEVICE_TREE="sun6i-a31s-sina31s"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC"
+ CONFIG_SPL=y
+ # CONFIG_CMD_IMLS is not set
+ # CONFIG_CMD_FLASH is not set
+@@ -19,5 +18,6 @@ CONFIG_SPL=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_DLDO1_VOLT=3300
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Sinovoip_BPI_M2_defconfig b/configs/Sinovoip_BPI_M2_defconfig
+index dbff2344bb..d123fad96b 100644
+--- a/configs/Sinovoip_BPI_M2_defconfig
++++ b/configs/Sinovoip_BPI_M2_defconfig
+@@ -6,7 +6,7 @@ CONFIG_USB1_VBUS_PIN=""
+ CONFIG_USB2_VBUS_PIN=""
+ CONFIG_DEFAULT_DEVICE_TREE="sun6i-a31s-sinovoip-bpi-m2"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII"
+ CONFIG_SPL=y
+ # CONFIG_CMD_IMLS is not set
+ # CONFIG_CMD_FLASH is not set
+@@ -15,6 +15,7 @@ CONFIG_SPL=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_ALDO1_VOLT=3300
+ CONFIG_AXP_ALDO2_VOLT=1800
+ CONFIG_AXP_DLDO1_VOLT=3000
+diff --git a/configs/Wits_Pro_A20_DKT_defconfig b/configs/Wits_Pro_A20_DKT_defconfig
+index cd6e821958..97fb699eca 100644
+--- a/configs/Wits_Pro_A20_DKT_defconfig
++++ b/configs/Wits_Pro_A20_DKT_defconfig
+@@ -11,7 +11,7 @@ CONFIG_VIDEO_LCD_PANEL_LVDS=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-wits-pro-a20-dkt"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -21,4 +21,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/i12-tvbox_defconfig b/configs/i12-tvbox_defconfig
+index 9715bb9228..d7dc703981 100644
+--- a/configs/i12-tvbox_defconfig
++++ b/configs/i12-tvbox_defconfig
+@@ -5,7 +5,7 @@ CONFIG_DRAM_CLK=384
+ CONFIG_VIDEO_COMPOSITE=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-i12-tvbox"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,MACPWR=SUNXI_GPH(21)"
++CONFIG_SYS_EXTRA_OPTIONS="MACPWR=SUNXI_GPH(21)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -15,4 +15,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/icnova-a20-swac_defconfig b/configs/icnova-a20-swac_defconfig
+index 30e75e3c71..569f2d9c86 100644
+--- a/configs/icnova-a20-swac_defconfig
++++ b/configs/icnova-a20-swac_defconfig
+@@ -12,7 +12,7 @@ CONFIG_VIDEO_LCD_POWER="PH22"
+ CONFIG_VIDEO_LCD_PANEL_LVDS=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-icnova-swac"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="AXP209_POWER,SUNXI_GMAC,CMD_BMP"
++CONFIG_SYS_EXTRA_OPTIONS="AXP209_POWER,CMD_BMP"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -23,4 +23,5 @@ CONFIG_CMD_UNZIP=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/mixtile_loftq_defconfig b/configs/mixtile_loftq_defconfig
+index ec6a4381ac..2dd107596a 100644
+--- a/configs/mixtile_loftq_defconfig
++++ b/configs/mixtile_loftq_defconfig
+@@ -7,7 +7,7 @@ CONFIG_USB1_VBUS_PIN="PH24"
+ CONFIG_USB2_VBUS_PIN=""
+ CONFIG_DEFAULT_DEVICE_TREE="sun6i-a31-mixtile-loftq"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_GMAC,RGMII,MACPWR=SUNXI_GPA(21)"
++CONFIG_SYS_EXTRA_OPTIONS="RGMII,MACPWR=SUNXI_GPA(21)"
+ CONFIG_SPL=y
+ # CONFIG_CMD_IMLS is not set
+ # CONFIG_CMD_FLASH is not set
+@@ -16,5 +16,6 @@ CONFIG_SPL=y
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
+ CONFIG_ETH_DESIGNWARE=y
++CONFIG_SUN7I_GMAC=y
+ CONFIG_AXP_ALDO1_VOLT=3300
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/drivers/net/Kconfig b/drivers/net/Kconfig
+index 8aa92790f4..1ba844d277 100644
+--- a/drivers/net/Kconfig
++++ b/drivers/net/Kconfig
+@@ -161,6 +161,11 @@ config RTL8169
+ 	  This driver supports Realtek 8169 series gigabit ethernet family of
+ 	  PCI/PCIe chipsets/adapters.
+ 
++config SUN7I_GMAC
++	bool "Enable Allwinner GMAC Ethernet support"
++	help
++	  Enable the support for Sun7i GMAC Ethernet controller
++
+ config SUN8I_EMAC
+         bool "Allwinner Sun8i Ethernet MAC support"
+         depends on DM_ETH
+-- 
+2.12.2
+

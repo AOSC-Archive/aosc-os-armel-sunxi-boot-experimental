@@ -1,0 +1,162 @@
+From f02abb0608fe7e47fa1ee62e0f7655d7e0e53a12 Mon Sep 17 00:00:00 2001
+From: Icenowy Zheng <icenowy@aosc.xyz>
+Date: Sat, 8 Apr 2017 15:30:14 +0800
+Subject: [PATCH 29/41] sunxi: add support for Lichee Pi Zero
+
+Lichee Pi Zero is a development board with a V3s SoC, which features
+64MiB DRAM co-packaged within the SoC, a TF slot, a SPI NOR slot (not
+soldered in production batch), a 40-pin RGB LCD connector and some extra
+pins available as 2.54mm pins or stamp holes.
+
+Add support for it.
+
+Signed-off-by: Icenowy Zheng <icenowy@aosc.io>
+Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+---
+ arch/arm/dts/Makefile                    |  2 +
+ arch/arm/dts/sun8i-v3s-licheepi-zero.dts | 83 ++++++++++++++++++++++++++++++++
+ board/sunxi/MAINTAINERS                  |  5 ++
+ configs/LicheePi_Zero_defconfig          | 12 +++++
+ 4 files changed, 102 insertions(+)
+ create mode 100644 arch/arm/dts/sun8i-v3s-licheepi-zero.dts
+ create mode 100644 configs/LicheePi_Zero_defconfig
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 198693c823..959e23d706 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -306,6 +306,8 @@ dtb-$(CONFIG_MACH_SUN8I_H3) += \
+ 	sun8i-h3-nanopi-neo-air.dtb
+ dtb-$(CONFIG_MACH_SUN8I_R40) += \
+ 	sun8i-r40-bananapi-m2-ultra.dtb
++dtb-$(CONFIG_MACH_SUN8I_V3S) += \
++	sun8i-v3s-licheepi-zero.dtb
+ dtb-$(CONFIG_MACH_SUN50I_H5) += \
+ 	sun50i-h5-orangepi-pc2.dtb
+ dtb-$(CONFIG_MACH_SUN50I) += \
+diff --git a/arch/arm/dts/sun8i-v3s-licheepi-zero.dts b/arch/arm/dts/sun8i-v3s-licheepi-zero.dts
+new file mode 100644
+index 0000000000..3d9168cbae
+--- /dev/null
++++ b/arch/arm/dts/sun8i-v3s-licheepi-zero.dts
+@@ -0,0 +1,83 @@
++/*
++ * Copyright (C) 2016 Icenowy Zheng <icenowy@aosc.xyz>
++ *
++ * This file is dual-licensed: you can use it either under the terms
++ * of the GPL or the X11 license, at your option. Note that this dual
++ * licensing only applies to this file, and not this project as a
++ * whole.
++ *
++ *  a) This file is free software; you can redistribute it and/or
++ *     modify it under the terms of the GNU General Public License as
++ *     published by the Free Software Foundation; either version 2 of the
++ *     License, or (at your option) any later version.
++ *
++ *     This file is distributed in the hope that it will be useful,
++ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *     GNU General Public License for more details.
++ *
++ * Or, alternatively,
++ *
++ *  b) Permission is hereby granted, free of charge, to any person
++ *     obtaining a copy of this software and associated documentation
++ *     files (the "Software"), to deal in the Software without
++ *     restriction, including without limitation the rights to use,
++ *     copy, modify, merge, publish, distribute, sublicense, and/or
++ *     sell copies of the Software, and to permit persons to whom the
++ *     Software is furnished to do so, subject to the following
++ *     conditions:
++ *
++ *     The above copyright notice and this permission notice shall be
++ *     included in all copies or substantial portions of the Software.
++ *
++ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
++ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
++ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
++ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ *     OTHER DEALINGS IN THE SOFTWARE.
++ */
++
++/dts-v1/;
++#include "sun8i-v3s.dtsi"
++#include "sunxi-common-regulators.dtsi"
++
++/ {
++	model = "Lichee Pi Zero";
++	compatible = "licheepi,licheepi-zero", "allwinner,sun8i-v3s";
++
++	aliases {
++		serial0 = &uart0;
++	};
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++};
++
++&mmc0 {
++	pinctrl-0 = <&mmc0_pins_a>;
++	pinctrl-names = "default";
++	broken-cd;
++	bus-width = <4>;
++	vmmc-supply = <&reg_vcc3v3>;
++	status = "okay";
++};
++
++&uart0 {
++	pinctrl-0 = <&uart0_pins_a>;
++	pinctrl-names = "default";
++	status = "okay";
++};
++
++&usb_otg {
++	dr_mode = "otg";
++	status = "okay";
++};
++
++&usbphy {
++	usb0_id_det-gpio = <&pio 5 6 GPIO_ACTIVE_HIGH>;
++	status = "okay";
++};
+diff --git a/board/sunxi/MAINTAINERS b/board/sunxi/MAINTAINERS
+index 7ce2a32094..f39402b89c 100644
+--- a/board/sunxi/MAINTAINERS
++++ b/board/sunxi/MAINTAINERS
+@@ -188,6 +188,11 @@ M:	Jelle de Jong <jelledejong@powercraft.nl>
+ S:	Maintained
+ F:	configs/Lamobo_R1_defconfig
+ 
++LICHEEPI-ZERO BOARD
++M:	Icenowy Zheng <icenowy@aosc.xyz>
++S:	Maintained
++F:	configs/LicheePi_Zero_defconfig
++
+ LINKSPRITE-PCDUINO BOARD
+ M:	Zoltan Herpai <wigyori@uid0.hu>
+ S:	Maintained
+diff --git a/configs/LicheePi_Zero_defconfig b/configs/LicheePi_Zero_defconfig
+new file mode 100644
+index 0000000000..c147084849
+--- /dev/null
++++ b/configs/LicheePi_Zero_defconfig
+@@ -0,0 +1,12 @@
++CONFIG_ARM=y
++CONFIG_ARCH_SUNXI=y
++CONFIG_MACH_SUN8I_V3S=y
++CONFIG_DRAM_CLK=360
++CONFIG_DRAM_ZQ=14779
++CONFIG_DEFAULT_DEVICE_TREE="sun8i-v3s-licheepi-zero"
++# CONFIG_CONSOLE_MUX is not set
++CONFIG_SPL=y
++# CONFIG_CMD_IMLS is not set
++# CONFIG_CMD_FLASH is not set
++# CONFIG_CMD_FPGA is not set
++# CONFIG_NETDEVICES is not set
+-- 
+2.12.2
+

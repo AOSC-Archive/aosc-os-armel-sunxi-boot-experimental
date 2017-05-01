@@ -1,0 +1,87 @@
+From 301791c9b07425497d170abae6fdcc289340bc6e Mon Sep 17 00:00:00 2001
+From: Chen-Yu Tsai <wens@csie.org>
+Date: Thu, 2 Mar 2017 16:03:06 +0800
+Subject: [PATCH 11/41] sunxi: Split up long Kconfig lines
+
+Currently we have some lines in board/sunxi/Kconfig that are very long.
+These line either provide default values for a set of SoCs, or limit
+some option to a subset of sunxi SoCs.
+
+Fortunately Kconfig makes it easy to split them. The Kconfig language
+document states
+
+    If multiple dependencies are defined, they are connected with '&&'.
+
+This means we can split existing dependencies at "&&" symbols. This
+applies to both the "depends on" lines and "if" expressions.
+
+This patch splits them up to one symbol per line. This will make it
+easier to add, remove, or modify one item at a time.
+
+Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+---
+ board/sunxi/Kconfig | 25 ++++++++++++++++++++-----
+ 1 file changed, 20 insertions(+), 5 deletions(-)
+
+diff --git a/board/sunxi/Kconfig b/board/sunxi/Kconfig
+index 87f282a493..67355589bf 100644
+--- a/board/sunxi/Kconfig
++++ b/board/sunxi/Kconfig
+@@ -159,7 +159,10 @@ endchoice
+ # The sun8i SoCs share a lot, this helps to avoid a lot of "if A23 || A33"
+ config MACH_SUN8I
+ 	bool
+-	default y if MACH_SUN8I_A23 || MACH_SUN8I_A33 || MACH_SUNXI_H3_H5 || MACH_SUN8I_A83T
++	default y if MACH_SUN8I_A23
++	default y if MACH_SUN8I_A33
++	default y if MACH_SUN8I_A83T
++	default y if MACH_SUNXI_H3_H5
+ 
+ config RESERVE_ALLWINNER_BOOT0_HEADER
+ 	bool "reserve space for Allwinner boot0 header"
+@@ -308,9 +311,13 @@ config DRAM_ODT_CORRECTION
+ endif
+ 
+ config SYS_CLK_FREQ
+-	default 816000000 if MACH_SUN50I
++	default 1008000000 if MACH_SUN4I
++	default 1008000000 if MACH_SUN5I
++	default 1008000000 if MACH_SUN6I
+ 	default 912000000 if MACH_SUN7I
+-	default 1008000000 if MACH_SUN4I || MACH_SUN5I || MACH_SUN6I || MACH_SUN8I || MACH_SUN9I
++	default 1008000000 if MACH_SUN8I
++	default 1008000000 if MACH_SUN9I
++	default 816000000 if MACH_SUN50I
+ 
+ config SYS_CONFIG_NAME
+ 	default "sun4i" if MACH_SUN4I
+@@ -519,7 +526,10 @@ config AXP_GPIO
+ 
+ config VIDEO
+ 	bool "Enable graphical uboot console on HDMI, LCD or VGA"
+-	depends on !MACH_SUN8I_A83T && !MACH_SUNXI_H3_H5 && !MACH_SUN9I && !MACH_SUN50I
++	depends on !MACH_SUN8I_A83T
++	depends on !MACH_SUNXI_H3_H5
++	depends on !MACH_SUN9I
++	depends on !MACH_SUN50I
+ 	default y
+ 	---help---
+ 	Say Y here to add support for using a cfb console on the HDMI, LCD
+@@ -728,7 +738,12 @@ config GMAC_TX_DELAY
+ 	Set the GMAC Transmit Clock Delay Chain value.
+ 
+ config SPL_STACK_R_ADDR
+-	default 0x4fe00000 if MACH_SUN4I || MACH_SUN5I || MACH_SUN6I || MACH_SUN7I || MACH_SUN8I || MACH_SUN50I
++	default 0x4fe00000 if MACH_SUN4I
++	default 0x4fe00000 if MACH_SUN5I
++	default 0x4fe00000 if MACH_SUN6I
++	default 0x4fe00000 if MACH_SUN7I
++	default 0x4fe00000 if MACH_SUN8I
+ 	default 0x2fe00000 if MACH_SUN9I
++	default 0x4fe00000 if MACH_SUN50I
+ 
+ endif
+-- 
+2.12.2
+

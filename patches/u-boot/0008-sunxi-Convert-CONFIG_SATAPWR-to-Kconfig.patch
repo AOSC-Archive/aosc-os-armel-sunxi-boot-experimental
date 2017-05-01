@@ -1,0 +1,307 @@
+From d7b560e6653b248a1920cbd2c5ac393d42e30b61 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Myl=C3=A8ne=20Josserand?=
+ <mylene.josserand@free-electrons.com>
+Date: Sun, 2 Apr 2017 12:59:09 +0200
+Subject: [PATCH 08/41] sunxi: Convert CONFIG_SATAPWR to Kconfig
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Convert the CONFIG_SATAPWR into kconfig.
+Thanks to that, many SYS_EXTRA_OPTIONS can be removed from some
+defconfigs.
+
+Signed-off-by: Mylène Josserand <mylene.josserand@free-electrons.com>
+Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+---
+ board/sunxi/Kconfig                        | 7 +++++++
+ board/sunxi/board.c                        | 7 ++++---
+ configs/A10-OLinuXino-Lime_defconfig       | 2 +-
+ configs/A20-OLinuXino-Lime2_defconfig      | 2 +-
+ configs/A20-OLinuXino-Lime_defconfig       | 2 +-
+ configs/A20-OLinuXino_MICRO_defconfig      | 2 +-
+ configs/A20-Olimex-SOM-EVB_defconfig       | 2 +-
+ configs/Cubieboard2_defconfig              | 2 +-
+ configs/Cubieboard_defconfig               | 2 +-
+ configs/Cubietruck_defconfig               | 2 +-
+ configs/Itead_Ibox_A20_defconfig           | 2 +-
+ configs/Lamobo_R1_defconfig                | 3 ++-
+ configs/Linksprite_pcDuino3_Nano_defconfig | 2 +-
+ configs/Linksprite_pcDuino3_defconfig      | 2 +-
+ configs/Sinovoip_BPI_M3_defconfig          | 2 +-
+ configs/orangepi_plus_defconfig            | 3 ++-
+ 16 files changed, 27 insertions(+), 17 deletions(-)
+
+diff --git a/board/sunxi/Kconfig b/board/sunxi/Kconfig
+index a667c9e5c5..aa6b84bbbb 100644
+--- a/board/sunxi/Kconfig
++++ b/board/sunxi/Kconfig
+@@ -706,6 +706,13 @@ config VIDEO_LCD_TL059WV5C0
+ 
+ endchoice
+ 
++config SATAPWR
++	string "SATA power pin"
++	default ""
++	help
++	  Set the pins used to power the SATA. This takes a string in the
++	  format understood by sunxi_name_to_gpio, e.g. PH1 for pin 1 of
++	  port H.
+ 
+ config GMAC_TX_DELAY
+ 	int "GMAC Transmit Clock Delay Chain"
+diff --git a/board/sunxi/board.c b/board/sunxi/board.c
+index b9660128e5..8043a8dbac 100644
+--- a/board/sunxi/board.c
++++ b/board/sunxi/board.c
+@@ -80,7 +80,7 @@ DECLARE_GLOBAL_DATA_PTR;
+ /* add board specific code here */
+ int board_init(void)
+ {
+-	__maybe_unused int id_pfr1, ret;
++	__maybe_unused int id_pfr1, ret, satapwr_pin;
+ 
+ 	gd->bd->bi_boot_params = (PHYS_SDRAM_0 + 0x100);
+ 
+@@ -118,8 +118,9 @@ int board_init(void)
+ 		return ret;
+ 
+ #ifdef CONFIG_SATAPWR
+-	gpio_request(CONFIG_SATAPWR, "satapwr");
+-	gpio_direction_output(CONFIG_SATAPWR, 1);
++	satapwr_pin = sunxi_name_to_gpio(CONFIG_SATAPWR);
++	gpio_request(satapwr_pin, "satapwr");
++	gpio_direction_output(satapwr_pin, 1);
+ #endif
+ #ifdef CONFIG_MACPWR
+ 	gpio_request(CONFIG_MACPWR, "macpwr");
+diff --git a/configs/A10-OLinuXino-Lime_defconfig b/configs/A10-OLinuXino-Lime_defconfig
+index 967a3d442b..50cd9e1674 100644
+--- a/configs/A10-OLinuXino-Lime_defconfig
++++ b/configs/A10-OLinuXino-Lime_defconfig
+@@ -5,10 +5,10 @@ CONFIG_DRAM_CLK=480
+ CONFIG_DRAM_EMR1=4
+ CONFIG_SYS_CLK_FREQ=912000000
+ CONFIG_MMC0_CD_PIN="PH1"
++CONFIG_SATAPWR="PC3"
+ CONFIG_DEFAULT_DEVICE_TREE="sun4i-a10-olinuxino-lime"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPC(3)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/A20-OLinuXino-Lime2_defconfig b/configs/A20-OLinuXino-Lime2_defconfig
+index 0c9c7943f9..427b7c313a 100644
+--- a/configs/A20-OLinuXino-Lime2_defconfig
++++ b/configs/A20-OLinuXino-Lime2_defconfig
+@@ -5,10 +5,10 @@ CONFIG_DRAM_CLK=384
+ CONFIG_MMC0_CD_PIN="PH1"
+ CONFIG_USB0_VBUS_PIN="PC17"
+ CONFIG_USB0_VBUS_DET="PH5"
++CONFIG_SATAPWR="PC3"
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-olinuxino-lime2"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPC(3)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/A20-OLinuXino-Lime_defconfig b/configs/A20-OLinuXino-Lime_defconfig
+index d83fc2b403..285f1ac85b 100644
+--- a/configs/A20-OLinuXino-Lime_defconfig
++++ b/configs/A20-OLinuXino-Lime_defconfig
+@@ -3,10 +3,10 @@ CONFIG_ARCH_SUNXI=y
+ CONFIG_MACH_SUN7I=y
+ CONFIG_DRAM_CLK=384
+ CONFIG_MMC0_CD_PIN="PH1"
++CONFIG_SATAPWR="PC3"
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-olinuxino-lime"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPC(3)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/A20-OLinuXino_MICRO_defconfig b/configs/A20-OLinuXino_MICRO_defconfig
+index c25556bdac..4aab6409d2 100644
+--- a/configs/A20-OLinuXino_MICRO_defconfig
++++ b/configs/A20-OLinuXino_MICRO_defconfig
+@@ -6,10 +6,10 @@ CONFIG_MMC0_CD_PIN="PH1"
+ CONFIG_MMC3_CD_PIN="PH11"
+ CONFIG_MMC_SUNXI_SLOT_EXTRA=3
+ CONFIG_VIDEO_VGA=y
++CONFIG_SATAPWR="PB8"
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-olinuxino-micro"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPB(8)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/A20-Olimex-SOM-EVB_defconfig b/configs/A20-Olimex-SOM-EVB_defconfig
+index ce658ca984..6c87648d4f 100644
+--- a/configs/A20-Olimex-SOM-EVB_defconfig
++++ b/configs/A20-Olimex-SOM-EVB_defconfig
+@@ -8,10 +8,10 @@ CONFIG_MMC3_PINS="PH"
+ CONFIG_MMC_SUNXI_SLOT_EXTRA=3
+ CONFIG_USB0_VBUS_PIN="PB9"
+ CONFIG_USB0_VBUS_DET="PH5"
++CONFIG_SATAPWR="PC3"
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-olimex-som-evb"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPC(3)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/Cubieboard2_defconfig b/configs/Cubieboard2_defconfig
+index 8968623ec5..02c503f672 100644
+--- a/configs/Cubieboard2_defconfig
++++ b/configs/Cubieboard2_defconfig
+@@ -3,10 +3,10 @@ CONFIG_ARCH_SUNXI=y
+ CONFIG_MACH_SUN7I=y
+ CONFIG_DRAM_CLK=480
+ CONFIG_MMC0_CD_PIN="PH1"
++CONFIG_SATAPWR="PB8"
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-cubieboard2"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPB(8)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/Cubieboard_defconfig b/configs/Cubieboard_defconfig
+index 78fd4a211b..a8e9c988d5 100644
+--- a/configs/Cubieboard_defconfig
++++ b/configs/Cubieboard_defconfig
+@@ -3,10 +3,10 @@ CONFIG_ARCH_SUNXI=y
+ CONFIG_MACH_SUN4I=y
+ CONFIG_DRAM_CLK=480
+ CONFIG_MMC0_CD_PIN="PH1"
++CONFIG_SATAPWR="PB8"
+ CONFIG_DEFAULT_DEVICE_TREE="sun4i-a10-cubieboard"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPB(8)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/Cubietruck_defconfig b/configs/Cubietruck_defconfig
+index 9f2e994f71..f9d56c8f9d 100644
+--- a/configs/Cubietruck_defconfig
++++ b/configs/Cubietruck_defconfig
+@@ -7,11 +7,11 @@ CONFIG_USB0_VBUS_PIN="PH17"
+ CONFIG_USB0_VBUS_DET="PH22"
+ CONFIG_USB0_ID_DET="PH19"
+ CONFIG_VIDEO_VGA=y
++CONFIG_SATAPWR="PH12"
+ CONFIG_GMAC_TX_DELAY=1
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-cubietruck"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPH(12)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/Itead_Ibox_A20_defconfig b/configs/Itead_Ibox_A20_defconfig
+index bba0c5973b..4bae19f2fa 100644
+--- a/configs/Itead_Ibox_A20_defconfig
++++ b/configs/Itead_Ibox_A20_defconfig
+@@ -3,10 +3,10 @@ CONFIG_ARCH_SUNXI=y
+ CONFIG_MACH_SUN7I=y
+ CONFIG_DRAM_CLK=480
+ CONFIG_MMC0_CD_PIN="PH1"
++CONFIG_SATAPWR="PB8"
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-itead-ibox"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPB(8)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/Lamobo_R1_defconfig b/configs/Lamobo_R1_defconfig
+index 61a9316e7a..38eea97000 100644
+--- a/configs/Lamobo_R1_defconfig
++++ b/configs/Lamobo_R1_defconfig
+@@ -3,11 +3,12 @@ CONFIG_ARCH_SUNXI=y
+ CONFIG_MACH_SUN7I=y
+ CONFIG_DRAM_CLK=432
+ CONFIG_MMC0_CD_PIN="PH10"
++CONFIG_SATAPWR="PB3"
+ CONFIG_GMAC_TX_DELAY=4
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-lamobo-r1"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="MACPWR=SUNXI_GPH(23),SATAPWR=SUNXI_GPB(3)"
++CONFIG_SYS_EXTRA_OPTIONS="MACPWR=SUNXI_GPH(23)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/Linksprite_pcDuino3_Nano_defconfig b/configs/Linksprite_pcDuino3_Nano_defconfig
+index 38adfc0f28..80416cb7b1 100644
+--- a/configs/Linksprite_pcDuino3_Nano_defconfig
++++ b/configs/Linksprite_pcDuino3_Nano_defconfig
+@@ -4,11 +4,11 @@ CONFIG_MACH_SUN7I=y
+ CONFIG_DRAM_CLK=408
+ CONFIG_DRAM_ZQ=122
+ CONFIG_USB1_VBUS_PIN="PH11"
++CONFIG_SATAPWR="PH2"
+ CONFIG_GMAC_TX_DELAY=3
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-pcduino3-nano"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPH(2)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/Linksprite_pcDuino3_defconfig b/configs/Linksprite_pcDuino3_defconfig
+index 8e8455eee4..b9f89a013e 100644
+--- a/configs/Linksprite_pcDuino3_defconfig
++++ b/configs/Linksprite_pcDuino3_defconfig
+@@ -3,10 +3,10 @@ CONFIG_ARCH_SUNXI=y
+ CONFIG_MACH_SUN7I=y
+ CONFIG_DRAM_CLK=480
+ CONFIG_DRAM_ZQ=122
++CONFIG_SATAPWR="PH2"
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-pcduino3"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPH(2)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/Sinovoip_BPI_M3_defconfig b/configs/Sinovoip_BPI_M3_defconfig
+index aec3f7d4bb..45eadcb443 100644
+--- a/configs/Sinovoip_BPI_M3_defconfig
++++ b/configs/Sinovoip_BPI_M3_defconfig
+@@ -11,9 +11,9 @@ CONFIG_USB0_VBUS_DET="AXP0-VBUS-DETECT"
+ CONFIG_USB0_ID_DET="PH11"
+ CONFIG_USB1_VBUS_PIN="PD24"
+ CONFIG_AXP_GPIO=y
++CONFIG_SATAPWR="PD25"
+ CONFIG_DEFAULT_DEVICE_TREE="sun8i-a83t-sinovoip-bpi-m3"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPD(25)"
+ CONFIG_CONSOLE_MUX=y
+ CONFIG_SPL=y
+ # CONFIG_CMD_IMLS is not set
+diff --git a/configs/orangepi_plus_defconfig b/configs/orangepi_plus_defconfig
+index fbaa5322e8..a14c7c75f0 100644
+--- a/configs/orangepi_plus_defconfig
++++ b/configs/orangepi_plus_defconfig
+@@ -6,9 +6,10 @@ CONFIG_DRAM_ZQ=3881979
+ CONFIG_DRAM_ODT_EN=y
+ CONFIG_MMC_SUNXI_SLOT_EXTRA=2
+ CONFIG_USB1_VBUS_PIN="PG13"
++CONFIG_SATAPWR="PG11"
+ CONFIG_DEFAULT_DEVICE_TREE="sun8i-h3-orangepi-plus"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPG(11),MACPWR=SUNXI_GPD(6)"
++CONFIG_SYS_EXTRA_OPTIONS="MACPWR=SUNXI_GPD(6)"
+ CONFIG_CONSOLE_MUX=y
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+-- 
+2.12.2
+

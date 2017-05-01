@@ -1,0 +1,201 @@
+From abc3e4df59f54cf3dda42a35a75d617fe861f5fe Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Myl=C3=A8ne=20Josserand?=
+ <mylene.josserand@free-electrons.com>
+Date: Sun, 2 Apr 2017 12:59:07 +0200
+Subject: [PATCH 06/41] sunxi: Convert SUNXI_EMAC to Kconfig
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Convert the SUNXI_EMAC config to Kconfig. Remove it from SYS_EXTRA_OPTIONS
+from many sunxi defconfig and renamed it into SUN4I_EMAC to not confuse it
+with SUN8I_EMAC.
+
+Signed-off-by: Mylène Josserand <mylene.josserand@free-electrons.com>
+Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+---
+ configs/A10-OLinuXino-Lime_defconfig | 3 ++-
+ configs/A10s-OLinuXino-M_defconfig   | 2 +-
+ configs/Cubieboard_defconfig         | 3 ++-
+ configs/Linksprite_pcDuino_defconfig | 2 +-
+ configs/Marsboard_A10_defconfig      | 2 +-
+ configs/Mele_A1000_defconfig         | 3 ++-
+ configs/ba10_tv_box_defconfig        | 2 +-
+ configs/jesurun_q5_defconfig         | 3 ++-
+ drivers/net/Kconfig                  | 6 ++++++
+ 9 files changed, 18 insertions(+), 8 deletions(-)
+
+diff --git a/configs/A10-OLinuXino-Lime_defconfig b/configs/A10-OLinuXino-Lime_defconfig
+index 6634139ab8..967a3d442b 100644
+--- a/configs/A10-OLinuXino-Lime_defconfig
++++ b/configs/A10-OLinuXino-Lime_defconfig
+@@ -8,7 +8,7 @@ CONFIG_MMC0_CD_PIN="PH1"
+ CONFIG_DEFAULT_DEVICE_TREE="sun4i-a10-olinuxino-lime"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_EMAC,SATAPWR=SUNXI_GPC(3)"
++CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPC(3)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -21,6 +21,7 @@ CONFIG_I2C1_ENABLE=y
+ # CONFIG_SPL_DOS_PARTITION is not set
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
++CONFIG_SUN4I_EMAC=y
+ CONFIG_AXP_ALDO3_VOLT=2800
+ CONFIG_AXP_ALDO4_VOLT=2800
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/A10s-OLinuXino-M_defconfig b/configs/A10s-OLinuXino-M_defconfig
+index 9c2a354ff4..af6f5bc6f7 100644
+--- a/configs/A10s-OLinuXino-M_defconfig
++++ b/configs/A10s-OLinuXino-M_defconfig
+@@ -8,7 +8,6 @@ CONFIG_MMC_SUNXI_SLOT_EXTRA=1
+ CONFIG_USB1_VBUS_PIN="PB10"
+ CONFIG_DEFAULT_DEVICE_TREE="sun5i-a10s-olinuxino-micro"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_EMAC"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -17,5 +16,6 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_DOS_PARTITION is not set
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
++CONFIG_SUN4I_EMAC=y
+ CONFIG_AXP152_POWER=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Cubieboard_defconfig b/configs/Cubieboard_defconfig
+index e1d1f1f8bb..78fd4a211b 100644
+--- a/configs/Cubieboard_defconfig
++++ b/configs/Cubieboard_defconfig
+@@ -6,7 +6,7 @@ CONFIG_MMC0_CD_PIN="PH1"
+ CONFIG_DEFAULT_DEVICE_TREE="sun4i-a10-cubieboard"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_EMAC,SATAPWR=SUNXI_GPB(8)"
++CONFIG_SYS_EXTRA_OPTIONS="SATAPWR=SUNXI_GPB(8)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -15,4 +15,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_DOS_PARTITION is not set
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
++CONFIG_SUN4I_EMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Linksprite_pcDuino_defconfig b/configs/Linksprite_pcDuino_defconfig
+index 1d2ab19a0b..e33a9c13a1 100644
+--- a/configs/Linksprite_pcDuino_defconfig
++++ b/configs/Linksprite_pcDuino_defconfig
+@@ -5,7 +5,6 @@ CONFIG_USB1_VBUS_PIN=""
+ CONFIG_USB2_VBUS_PIN=""
+ CONFIG_DEFAULT_DEVICE_TREE="sun4i-a10-pcduino"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_EMAC"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -14,4 +13,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_DOS_PARTITION is not set
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
++CONFIG_SUN4I_EMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Marsboard_A10_defconfig b/configs/Marsboard_A10_defconfig
+index 34e78f1e8c..6b8bd1ad20 100644
+--- a/configs/Marsboard_A10_defconfig
++++ b/configs/Marsboard_A10_defconfig
+@@ -4,7 +4,6 @@ CONFIG_MACH_SUN4I=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun4i-a10-marsboard"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_EMAC"
+ CONFIG_SPL=y
+ # CONFIG_CMD_IMLS is not set
+ # CONFIG_CMD_FLASH is not set
+@@ -12,5 +11,6 @@ CONFIG_SPL=y
+ # CONFIG_SPL_DOS_PARTITION is not set
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
++CONFIG_SUN4I_EMAC=y
+ CONFIG_SUNXI_NO_PMIC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/Mele_A1000_defconfig b/configs/Mele_A1000_defconfig
+index 4496688d3f..4bd81a262c 100644
+--- a/configs/Mele_A1000_defconfig
++++ b/configs/Mele_A1000_defconfig
+@@ -6,7 +6,7 @@ CONFIG_VIDEO_COMPOSITE=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun4i-a10-a1000"
+ CONFIG_AHCI=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_EMAC,MACPWR=SUNXI_GPH(15)"
++CONFIG_SYS_EXTRA_OPTIONS="MACPWR=SUNXI_GPH(15)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -15,4 +15,5 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_DOS_PARTITION is not set
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
++CONFIG_SUN4I_EMAC=y
+ CONFIG_USB_EHCI_HCD=y
+diff --git a/configs/ba10_tv_box_defconfig b/configs/ba10_tv_box_defconfig
+index ec71159151..ad066fdffa 100644
+--- a/configs/ba10_tv_box_defconfig
++++ b/configs/ba10_tv_box_defconfig
+@@ -8,7 +8,6 @@ CONFIG_USB2_VBUS_PIN="PH12"
+ CONFIG_VIDEO_COMPOSITE=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun4i-a10-ba10-tvbox"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_EMAC"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -17,5 +16,6 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_DOS_PARTITION is not set
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
++CONFIG_SUN4I_EMAC=y
+ CONFIG_USB_EHCI_HCD=y
+ CONFIG_USB_MUSB_HOST=y
+diff --git a/configs/jesurun_q5_defconfig b/configs/jesurun_q5_defconfig
+index a6bec12fd2..608e523e4c 100644
+--- a/configs/jesurun_q5_defconfig
++++ b/configs/jesurun_q5_defconfig
+@@ -6,7 +6,7 @@ CONFIG_USB0_VBUS_PIN="PB9"
+ CONFIG_VIDEO_COMPOSITE=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun4i-a10-jesurun-q5"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="SUNXI_EMAC,MACPWR=SUNXI_GPH(19)"
++CONFIG_SYS_EXTRA_OPTIONS="MACPWR=SUNXI_GPH(19)"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+@@ -15,5 +15,6 @@ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_SPL_DOS_PARTITION is not set
+ # CONFIG_SPL_ISO_PARTITION is not set
+ # CONFIG_SPL_EFI_PARTITION is not set
++CONFIG_SUN4I_EMAC=y
+ CONFIG_USB_EHCI_HCD=y
+ CONFIG_USB_MUSB_HOST=y
+diff --git a/drivers/net/Kconfig b/drivers/net/Kconfig
+index 1ba844d277..6126d10c39 100644
+--- a/drivers/net/Kconfig
++++ b/drivers/net/Kconfig
+@@ -166,6 +166,12 @@ config SUN7I_GMAC
+ 	help
+ 	  Enable the support for Sun7i GMAC Ethernet controller
+ 
++config SUN4I_EMAC
++	bool "Allwinner Sun4i Ethernet MAC support"
++	depends on DM_ETH
++	help
++	  This driver supports the Allwinner based SUN4I Ethernet MAC.
++
+ config SUN8I_EMAC
+         bool "Allwinner Sun8i Ethernet MAC support"
+         depends on DM_ETH
+-- 
+2.12.2
+

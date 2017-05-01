@@ -1,0 +1,33 @@
+From 38495ebaf660e4848631ba470b950a7d7a250839 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Myl=C3=A8ne=20Josserand?=
+ <mylene.josserand@free-electrons.com>
+Date: Sun, 2 Apr 2017 12:59:05 +0200
+Subject: [PATCH 04/41] sunxi: icnova-a20-swac_defconfig: Remove CMD_BMP from
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This configuration is not necessary in a defconfig file so
+it is removed from the SYS_EXTRA_OPTIONS.
+
+Signed-off-by: Mylène Josserand <mylene.josserand@free-electrons.com>
+Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+---
+ configs/icnova-a20-swac_defconfig | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/configs/icnova-a20-swac_defconfig b/configs/icnova-a20-swac_defconfig
+index bc46c9adf0..6f79c587ee 100644
+--- a/configs/icnova-a20-swac_defconfig
++++ b/configs/icnova-a20-swac_defconfig
+@@ -12,7 +12,6 @@ CONFIG_VIDEO_LCD_POWER="PH22"
+ CONFIG_VIDEO_LCD_PANEL_LVDS=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-icnova-swac"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="CMD_BMP"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+-- 
+2.12.2
+

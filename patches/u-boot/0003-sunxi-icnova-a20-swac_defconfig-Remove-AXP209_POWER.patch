@@ -1,0 +1,35 @@
+From e34dc387bd5d37e75e963f0801be9c5ae556b26d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Myl=C3=A8ne=20Josserand?=
+ <mylene.josserand@free-electrons.com>
+Date: Sun, 2 Apr 2017 12:59:04 +0200
+Subject: [PATCH 03/41] sunxi: icnova-a20-swac_defconfig: Remove AXP209_POWER
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Remove the AXP209_POWER option from SYS_EXTRA_OPTIONS.
+As this configuration already exists on Kconfig, we just need
+to remove it from defconfig.
+
+Signed-off-by: Mylène Josserand <mylene.josserand@free-electrons.com>
+Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+---
+ configs/icnova-a20-swac_defconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configs/icnova-a20-swac_defconfig b/configs/icnova-a20-swac_defconfig
+index 569f2d9c86..bc46c9adf0 100644
+--- a/configs/icnova-a20-swac_defconfig
++++ b/configs/icnova-a20-swac_defconfig
+@@ -12,7 +12,7 @@ CONFIG_VIDEO_LCD_POWER="PH22"
+ CONFIG_VIDEO_LCD_PANEL_LVDS=y
+ CONFIG_DEFAULT_DEVICE_TREE="sun7i-a20-icnova-swac"
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
+-CONFIG_SYS_EXTRA_OPTIONS="AXP209_POWER,CMD_BMP"
++CONFIG_SYS_EXTRA_OPTIONS="CMD_BMP"
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ # CONFIG_CMD_IMLS is not set
+-- 
+2.12.2
+

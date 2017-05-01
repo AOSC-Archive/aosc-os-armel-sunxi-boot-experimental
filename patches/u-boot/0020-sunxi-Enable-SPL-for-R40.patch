@@ -1,0 +1,29 @@
+From 50ae7ae58320855b41eace591a63d1439a0ef4d4 Mon Sep 17 00:00:00 2001
+From: Chen-Yu Tsai <wens@csie.org>
+Date: Fri, 2 Dec 2016 16:09:49 +0800
+Subject: [PATCH 20/41] sunxi: Enable SPL for R40
+
+Now that we can do DRAM initialization for the R40, we can enable
+SPL support for it.
+
+Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+---
+ board/sunxi/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/board/sunxi/Kconfig b/board/sunxi/Kconfig
+index 92f9d32ce9..0040e7e763 100644
+--- a/board/sunxi/Kconfig
++++ b/board/sunxi/Kconfig
+@@ -138,6 +138,7 @@ config MACH_SUN8I_R40
+ 	bool "sun8i (Allwinner R40)"
+ 	select CPU_V7
+ 	select SUNXI_GEN_SUN6I
++	select SUPPORT_SPL
+ 
+ config MACH_SUN9I
+ 	bool "sun9i (Allwinner A80)"
+-- 
+2.12.2
+

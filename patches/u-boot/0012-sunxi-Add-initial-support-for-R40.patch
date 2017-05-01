@@ -1,0 +1,161 @@
+From 379febac5a3ea9f1952c2234a9acfd1b16f9100f Mon Sep 17 00:00:00 2001
+From: Chen-Yu Tsai <wens@csie.org>
+Date: Wed, 30 Nov 2016 14:57:32 +0800
+Subject: [PATCH 12/41] sunxi: Add initial support for R40
+
+The R40 is the successor to the A20. It is a hybrid of the A20, A33
+and the H3.
+
+The R40's PIO controller is compatible with the A20,
+Reuse the A20 UART and I2C muxing code by adding the R40's macro.
+
+The display pipeline is the newer DE 2.0 variant.
+Block enabling video on R40 for now.
+
+Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+---
+ arch/arm/mach-sunxi/board.c    | 10 +++++++---
+ arch/arm/mach-sunxi/cpu_info.c |  2 ++
+ board/sunxi/Kconfig            |  7 +++++++
+ board/sunxi/board.c            | 19 ++++++++++++++-----
+ 4 files changed, 30 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/mach-sunxi/board.c b/arch/arm/mach-sunxi/board.c
+index 5e03d03943..5a74c9717d 100644
+--- a/arch/arm/mach-sunxi/board.c
++++ b/arch/arm/mach-sunxi/board.c
+@@ -69,12 +69,14 @@ struct mm_region *mem_map = sunxi_mem_map;
+ static int gpio_init(void)
+ {
+ #if CONFIG_CONS_INDEX == 1 && defined(CONFIG_UART0_PORT_F)
+-#if defined(CONFIG_MACH_SUN4I) || defined(CONFIG_MACH_SUN7I)
++#if defined(CONFIG_MACH_SUN4I) || \
++    defined(CONFIG_MACH_SUN7I) || \
++    defined(CONFIG_MACH_SUN8I_R40)
+ 	/* disable GPB22,23 as uart0 tx,rx to avoid conflict */
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(22), SUNXI_GPIO_INPUT);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(23), SUNXI_GPIO_INPUT);
+ #endif
+-#if defined(CONFIG_MACH_SUN8I)
++#if defined(CONFIG_MACH_SUN8I) && !defined(CONFIG_MACH_SUN8I_R40)
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPF(2), SUN8I_GPF_UART0);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPF(4), SUN8I_GPF_UART0);
+ #else
+@@ -82,7 +84,9 @@ static int gpio_init(void)
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPF(4), SUNXI_GPF_UART0);
+ #endif
+ 	sunxi_gpio_set_pull(SUNXI_GPF(4), 1);
+-#elif CONFIG_CONS_INDEX == 1 && (defined(CONFIG_MACH_SUN4I) || defined(CONFIG_MACH_SUN7I))
++#elif CONFIG_CONS_INDEX == 1 && (defined(CONFIG_MACH_SUN4I) || \
++				 defined(CONFIG_MACH_SUN7I) || \
++				 defined(CONFIG_MACH_SUN8I_R40))
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(22), SUN4I_GPB_UART0);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(23), SUN4I_GPB_UART0);
+ 	sunxi_gpio_set_pull(SUNXI_GPB(23), SUNXI_GPIO_PULL_UP);
+diff --git a/arch/arm/mach-sunxi/cpu_info.c b/arch/arm/mach-sunxi/cpu_info.c
+index 85633ccec2..7851de299a 100644
+--- a/arch/arm/mach-sunxi/cpu_info.c
++++ b/arch/arm/mach-sunxi/cpu_info.c
+@@ -87,6 +87,8 @@ int print_cpuinfo(void)
+ 	printf("CPU:   Allwinner A83T (SUN8I %04x)\n", sunxi_get_sram_id());
+ #elif defined CONFIG_MACH_SUN8I_H3
+ 	printf("CPU:   Allwinner H3 (SUN8I %04x)\n", sunxi_get_sram_id());
++#elif defined CONFIG_MACH_SUN8I_R40
++	printf("CPU:   Allwinner R40 (SUN8I %04x)\n", sunxi_get_sram_id());
+ #elif defined CONFIG_MACH_SUN9I
+ 	puts("CPU:   Allwinner A80 (SUN9I)\n");
+ #elif defined CONFIG_MACH_SUN50I
+diff --git a/board/sunxi/Kconfig b/board/sunxi/Kconfig
+index 67355589bf..3df7077313 100644
+--- a/board/sunxi/Kconfig
++++ b/board/sunxi/Kconfig
+@@ -134,6 +134,11 @@ config MACH_SUN8I_H3
+ 	select MACH_SUNXI_H3_H5
+ 	select ARMV7_BOOT_SEC_DEFAULT if OLD_SUNXI_KERNEL_COMPAT
+ 
++config MACH_SUN8I_R40
++	bool "sun8i (Allwinner R40)"
++	select CPU_V7
++	select SUNXI_GEN_SUN6I
++
+ config MACH_SUN9I
+ 	bool "sun9i (Allwinner A80)"
+ 	select CPU_V7
+@@ -163,6 +168,7 @@ config MACH_SUN8I
+ 	default y if MACH_SUN8I_A33
+ 	default y if MACH_SUN8I_A83T
+ 	default y if MACH_SUNXI_H3_H5
++	default y if MACH_SUN8I_R40
+ 
+ config RESERVE_ALLWINNER_BOOT0_HEADER
+ 	bool "reserve space for Allwinner boot0 header"
+@@ -528,6 +534,7 @@ config VIDEO
+ 	bool "Enable graphical uboot console on HDMI, LCD or VGA"
+ 	depends on !MACH_SUN8I_A83T
+ 	depends on !MACH_SUNXI_H3_H5
++	depends on !MACH_SUN8I_R40
+ 	depends on !MACH_SUN9I
+ 	depends on !MACH_SUN50I
+ 	default y
+diff --git a/board/sunxi/board.c b/board/sunxi/board.c
+index e2bba9abde..4c21180229 100644
+--- a/board/sunxi/board.c
++++ b/board/sunxi/board.c
+@@ -396,7 +396,10 @@ int board_mmc_init(bd_t *bis)
+ void i2c_init_board(void)
+ {
+ #ifdef CONFIG_I2C0_ENABLE
+-#if defined(CONFIG_MACH_SUN4I) || defined(CONFIG_MACH_SUN5I) || defined(CONFIG_MACH_SUN7I)
++#if defined(CONFIG_MACH_SUN4I) || \
++    defined(CONFIG_MACH_SUN5I) || \
++    defined(CONFIG_MACH_SUN7I) || \
++    defined(CONFIG_MACH_SUN8I_R40)
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(0), SUN4I_GPB_TWI0);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(1), SUN4I_GPB_TWI0);
+ 	clock_twi_onoff(0, 1);
+@@ -412,7 +415,9 @@ void i2c_init_board(void)
+ #endif
+ 
+ #ifdef CONFIG_I2C1_ENABLE
+-#if defined(CONFIG_MACH_SUN4I) || defined(CONFIG_MACH_SUN7I)
++#if defined(CONFIG_MACH_SUN4I) || \
++    defined(CONFIG_MACH_SUN7I) || \
++    defined(CONFIG_MACH_SUN8I_R40)
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(18), SUN4I_GPB_TWI1);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(19), SUN4I_GPB_TWI1);
+ 	clock_twi_onoff(1, 1);
+@@ -432,7 +437,9 @@ void i2c_init_board(void)
+ #endif
+ 
+ #ifdef CONFIG_I2C2_ENABLE
+-#if defined(CONFIG_MACH_SUN4I) || defined(CONFIG_MACH_SUN7I)
++#if defined(CONFIG_MACH_SUN4I) || \
++    defined(CONFIG_MACH_SUN7I) || \
++    defined(CONFIG_MACH_SUN8I_R40)
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(20), SUN4I_GPB_TWI2);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(21), SUN4I_GPB_TWI2);
+ 	clock_twi_onoff(2, 1);
+@@ -456,7 +463,8 @@ void i2c_init_board(void)
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPG(10), SUN6I_GPG_TWI3);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPG(11), SUN6I_GPG_TWI3);
+ 	clock_twi_onoff(3, 1);
+-#elif defined(CONFIG_MACH_SUN7I)
++#elif defined(CONFIG_MACH_SUN7I) || \
++      defined(CONFIG_MACH_SUN8I_R40)
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPI(0), SUN7I_GPI_TWI3);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPI(1), SUN7I_GPI_TWI3);
+ 	clock_twi_onoff(3, 1);
+@@ -464,7 +472,8 @@ void i2c_init_board(void)
+ #endif
+ 
+ #ifdef CONFIG_I2C4_ENABLE
+-#if defined(CONFIG_MACH_SUN7I)
++#if defined(CONFIG_MACH_SUN7I) || \
++    defined(CONFIG_MACH_SUN8I_R40)
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPI(2), SUN7I_GPI_TWI4);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPI(3), SUN7I_GPI_TWI4);
+ 	clock_twi_onoff(4, 1);
+-- 
+2.12.2
+

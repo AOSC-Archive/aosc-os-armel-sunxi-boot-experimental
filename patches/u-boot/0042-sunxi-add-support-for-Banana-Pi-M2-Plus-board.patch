@@ -1,0 +1,63 @@
+From b8e4405c6f206afb4bf737fee536a86191e3bcf0 Mon Sep 17 00:00:00 2001
+From: Icenowy Zheng <icenowy@aosc.io>
+Date: Mon, 1 May 2017 17:55:59 +0800
+Subject: [PATCH] sunxi: add support for Banana Pi M2 Plus board
+
+Banana Pi M2 Plus is an Allwinner H3-based SBC by Sinovoip, which has
+already mainline device tree file that have landed into U-Boot source
+tree.
+
+Add a defconfig file for it and add the MAINTAINERS items.
+
+Signed-off-by: Icenowy Zheng <icenowy@aosc.io>
+---
+ board/sunxi/MAINTAINERS                |  5 +++++
+ configs/Sinovoip_BPI_M2_Plus_defconfig | 20 ++++++++++++++++++++
+ 2 files changed, 25 insertions(+)
+ create mode 100644 configs/Sinovoip_BPI_M2_Plus_defconfig
+
+diff --git a/board/sunxi/MAINTAINERS b/board/sunxi/MAINTAINERS
+index f39402b89c..1c8817375d 100644
+--- a/board/sunxi/MAINTAINERS
++++ b/board/sunxi/MAINTAINERS
+@@ -280,6 +280,11 @@ S:	Maintained
+ F:	configs/Sinlinx_SinA33_defconfig
+ W:	http://linux-sunxi.org/Sinlinx_SinA33
+ 
++SINOVOIP BPI M2 PLUS H3 BOARD
++M:	Icenowy Zheng <icenowy@aosc.io>
++S:	Maintained
++F:	configs/Sinovoip_BPI_M2_Plus_defconfig
++
+ SINOVOIP BPI M3 A83T BOARD
+ M:	VishnuPatekar <vishnupatekar0510@gmail.com>
+ S:	Maintained
+diff --git a/configs/Sinovoip_BPI_M2_Plus_defconfig b/configs/Sinovoip_BPI_M2_Plus_defconfig
+new file mode 100644
+index 0000000000..e8cd4fb9ec
+--- /dev/null
++++ b/configs/Sinovoip_BPI_M2_Plus_defconfig
+@@ -0,0 +1,20 @@
++CONFIG_ARM=y
++CONFIG_ARCH_SUNXI=y
++CONFIG_MACH_SUN8I_H3=y
++CONFIG_DRAM_CLK=672
++CONFIG_DRAM_ZQ=3881979
++CONFIG_DRAM_ODT_EN=y
++CONFIG_MACPWR="PD6"
++CONFIG_MMC_SUNXI_SLOT_EXTRA=2
++CONFIG_DEFAULT_DEVICE_TREE="sun8i-h3-bananapi-m2-plus"
++# CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
++CONFIG_CONSOLE_MUX=y
++CONFIG_SPL=y
++# CONFIG_CMD_IMLS is not set
++# CONFIG_CMD_FLASH is not set
++# CONFIG_CMD_FPGA is not set
++# CONFIG_SPL_DOS_PARTITION is not set
++# CONFIG_SPL_ISO_PARTITION is not set
++# CONFIG_SPL_EFI_PARTITION is not set
++CONFIG_SUN8I_EMAC=y
++CONFIG_USB_EHCI_HCD=y
+-- 
+2.12.2
+
