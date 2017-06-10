@@ -26,7 +26,6 @@
 
 #ifndef __DRV_TYPES_H__
 #define __DRV_TYPES_H__
-
 #include <drv_conf.h>
 #include <basic_types.h>
 #include <osdep_service.h>

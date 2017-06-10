@@ -1650,10 +1650,10 @@ static int sip_parse_mac_rx_info(struct esp_sip *sip,
 	rx_status->band = NL80211_BAND_2GHZ;
 	rx_status->flag = RX_FLAG_DECRYPTED | RX_FLAG_MMIC_STRIPPED;
 	if (mac_ctrl->sig_mode) {
-		rx_status->flag |= RX_FLAG_HT;
+		rx_status->encoding |= RX_ENC_HT;
 		rx_status->rate_idx = mac_ctrl->MCS;
 		if (mac_ctrl->SGI)
-			rx_status->flag |= RX_FLAG_SHORT_GI;
+			rx_status->enc_flags |= RX_ENC_FLAG_SHORT_GI;
 	} else {
 		rx_status->rate_idx = esp_wmac_rate2idx(mac_ctrl->rate);
 	}

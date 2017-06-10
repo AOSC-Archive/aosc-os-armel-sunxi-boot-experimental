@@ -2,8 +2,8 @@ diff --git a/arch/arm/boot/dts/sun8i-h3.dtsi b/arch/arm/boot/dts/sun8i-h3.dtsi
 index 1101d2f..d218154 100644
 --- a/arch/arm/boot/dts/sun8i-h3.dtsi
 +++ b/arch/arm/boot/dts/sun8i-h3.dtsi
-@@ -446,6 +446,30 @@
- 			status = "disabled";
+@@ -189,6 +189,30 @@
+ 			};
  		};
  
 +		emac: ethernet@1c30000 {
@@ -30,6 +30,6 @@ index 1101d2f..d218154 100644
 +			};
 +		};
 +
- 		gic: interrupt-controller@01c81000 {
- 			compatible = "arm,cortex-a7-gic", "arm,cortex-a15-gic";
- 			reg = <0x01c81000 0x1000>,
+ 		tcon0: lcd-controller@1c0c000 {
+ 			compatible = "allwinner,sun8i-a83t-tcon1";
+ 			reg = <0x01c0c000 0x1000>;
