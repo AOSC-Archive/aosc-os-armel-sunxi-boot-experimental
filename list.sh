@@ -1,4 +1,3 @@
-# FIXME: use a dedicated config for Nano Pi M1 once ready
 UBOOT_TARGETS="
 Cubieboard=sun4i-a10-cubieboard
 Linksprite_pcDuino=sun4i-a10-pcduino
@@ -36,7 +35,7 @@ orangepi_plus=sun8i-h3-orangepi-plus
 Sinovoip_BPI_M2_Plus=sun8i-h3-bananapi-m2-plus
 orangepi_plus2e=sun8i-h3-orangepi-plus2e
 nanopi_neo=sun8i-h3-nanopi-neo
-orangepi_pc=sun8i-h3-nanopi-m1
+nanopi_m1=sun8i-h3-nanopi-m1
 
 q8_a13_tablet=sun5i-a13-q8
 q8_a23_tablet_800x480=sun8i-a23-q8
