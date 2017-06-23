@@ -16,9 +16,9 @@ index 75a8654..cacc8dd 100644
 --- a/arch/arm/boot/dts/sun8i-h3.dtsi
 +++ b/arch/arm/boot/dts/sun8i-h3.dtsi
 @@ -50,6 +50,22 @@
- / {
- 	interrupt-parent = <&gic>;
+ #include "sunxi-h3-h5.dtsi"
  
+ / {
 +	chosen {
 +		#address-cells = <1>;
 +		#size-cells = <1>;

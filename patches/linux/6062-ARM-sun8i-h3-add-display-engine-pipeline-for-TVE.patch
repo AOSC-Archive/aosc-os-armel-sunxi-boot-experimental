@@ -21,9 +21,9 @@ index 27780b97c863..acbb287a6829 100644
 --- a/arch/arm/boot/dts/sun8i-h3.dtsi
 +++ b/arch/arm/boot/dts/sun8i-h3.dtsi
 @@ -46,6 +46,8 @@
- #include <dt-bindings/interrupt-controller/arm-gic.h>
- #include <dt-bindings/pinctrl/sun4i-a10.h>
- #include <dt-bindings/reset/sun8i-h3-ccu.h>
+ */
+
+ #include "sunxi-h3-h5.dtsi"
 +#include <dt-bindings/clock/sun8i-de2.h>
 +#include <dt-bindings/reset/sun8i-de2.h>
  

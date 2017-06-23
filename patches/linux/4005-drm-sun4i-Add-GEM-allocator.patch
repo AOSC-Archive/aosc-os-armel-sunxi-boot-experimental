@@ -15,14 +15,14 @@ index 0da9862..76ce8bc 100644
 --- a/drivers/gpu/drm/sun4i/sun4i_drv.c
 +++ b/drivers/gpu/drm/sun4i/sun4i_drv.c
 @@ -19,6 +19,8 @@
- #include <drm/drm_gem_cma_helper.h>
  #include <drm/drm_fb_helper.h>
+ #include <drm/drm_of.h>
  
 +#include <uapi/drm/sun4i_drm.h>
 +
- #include "sun4i_crtc.h"
  #include "sun4i_drv.h"
  #include "sun4i_framebuffer.h"
+ #include "sun4i_tcon.h"
 @@ -61,6 +63,27 @@ static const struct file_operations sun4i_drv_fops = {
  	.mmap		= drm_gem_cma_mmap,
  };
