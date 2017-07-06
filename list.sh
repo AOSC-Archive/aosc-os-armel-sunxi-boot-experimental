@@ -36,6 +36,7 @@ Sinovoip_BPI_M2_Plus=sun8i-h3-bananapi-m2-plus
 orangepi_plus2e=sun8i-h3-orangepi-plus2e
 nanopi_neo=sun8i-h3-nanopi-neo
 nanopi_m1=sun8i-h3-nanopi-m1
+Bananapi_M2_Ultra_defconfig=sun8i-r40-bananapi-m2-ultra
 
 q8_a13_tablet=sun5i-a13-q8
 q8_a23_tablet_800x480=sun8i-a23-q8
@@ -79,6 +80,7 @@ sun8i-h3-orangepi-plus=sun8i-h3-orangepi-plus
 sun8i-h3-orangepi-plus2e=sun8i-h3-orangepi-plus2e
 sun8i-h3-nanopi-neo=sun8i-h3-nanopi-neo
 sun8i-h3-nanopi-m1=sun8i-h3-nanopi-m1
+
 
 sun5i-a13-q8-tablet=sun5i-a13-q8
 sun8i-a23-q8-tablet=sun8i-a23-q8
