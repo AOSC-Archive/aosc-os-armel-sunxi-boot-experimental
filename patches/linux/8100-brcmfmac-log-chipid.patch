@@ -1,0 +1,22 @@
+For debugging some problems, it is useful to know the chip revision
+add a brcmf_info message logging this.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c 
+b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
+index e03450059b06..4ed40c94bda9 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
+@@ -4214,6 +4214,8 @@ struct brcmf_sdio *brcmf_sdio_probe(struct brcmf_sdio_dev *sdiodev)
+ 	if (ret)
+ 		goto fail;
+ 
++	brcmf_info("Loading firmware %s for chip %08x rev %08x\n",
++		   sdiodev->fw_name, bus->ci->chip, bus->ci->chiprev);
+ 	ret = brcmf_fw_get_firmwares(sdiodev->dev, BRCMF_FW_REQUEST_NVRAM,
+ 				     sdiodev->fw_name, sdiodev->nvram_name,
+ 				     brcmf_sdio_firmware_callback);
