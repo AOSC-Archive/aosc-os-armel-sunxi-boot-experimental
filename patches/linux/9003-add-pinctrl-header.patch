@@ -1,9 +1,9 @@
 --- a/arch/arm/boot/dts/sunxi-h3-h5.dtsi	2017-06-23 22:09:51.120176274 +0800
 +++ b/arch/arm/boot/dts/sunxi-h3-h5.dtsi	2017-06-23 22:13:09.388129293 +0800
 @@ -43,6 +43,7 @@
- #include <dt-bindings/clock/sun8i-h3-ccu.h>
  #include <dt-bindings/interrupt-controller/arm-gic.h>
  #include <dt-bindings/reset/sun8i-h3-ccu.h>
+ #include <dt-bindings/reset/sun8i-r-ccu.h>
 +#include <dt-bindings/pinctrl/sun4i-a10.h>
  
  / {

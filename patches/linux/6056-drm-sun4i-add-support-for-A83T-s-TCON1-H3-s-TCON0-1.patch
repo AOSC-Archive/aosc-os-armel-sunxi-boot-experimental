@@ -165,14 +165,14 @@ diff --git a/drivers/gpu/drm/sun4i/sun4i_tcon.h b/drivers/gpu/drm/sun4i/sun4i_tc
 index 568dc736238a..f7a8fed1699e 100644
 --- a/drivers/gpu/drm/sun4i/sun4i_tcon.h
 +++ b/drivers/gpu/drm/sun4i/sun4i_tcon.h
-@@ -145,9 +145,15 @@
+@@ -145,7 +145,15 @@
  
  struct sun4i_tcon_quirks {
  	bool	has_unknown_mux; /* sun5i has undocumented mux */
 +	bool	has_channel_0;	/* some A83T+ TCONs don't have channel 0*/
  	bool	has_channel_1;	/* a33 does not have channel 1 */
- 	/* Some DE2 can swap the mixer<->TCON connection */
- 	bool	swappable_input;
++	/* Some DE2 can swap the mixer<->TCON connection */
++	bool	swappable_input;
 +	/*
 +	 * H3 TCON1 has its clock feed from TVE mod clock, and if TCON
 +	 * change it, the TVE will refuse to generate output signal.

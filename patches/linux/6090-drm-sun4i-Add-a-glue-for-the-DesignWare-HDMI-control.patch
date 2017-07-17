@@ -37,12 +37,12 @@ index 15557484520d..3b0fcd3f3cf2 100644
 +	  selected the module will be called dw_hdmi-sunxi.
 diff --git a/drivers/gpu/drm/sun4i/Makefile b/drivers/gpu/drm/sun4i/Makefile
 index d81c9319dadf..c3d0ffca3e75 100644
---- a/drivers/gpu/drm/sun4i/Makefile
-+++ b/drivers/gpu/drm/sun4i/Makefile
-@@ -16,3 +16,5 @@ obj-$(CONFIG_DRM_SUN4I)		+= sun4i_tv.o
- 
+--- a/drivers/gpu/drm/sun4i/Makefile	2017-07-17 23:46:08.346192551 +0800
++++ b/drivers/gpu/drm/sun4i/Makefile	2017-07-17 23:47:22.966812238 +0800
+@@ -21,3 +21,5 @@
  obj-$(CONFIG_DRM_SUN4I_BACKEND)		+= sun4i-backend.o
- obj-$(CONFIG_DRM_SUN4I_SUN8I_MIXER)	+= sun8i-mixer.o
+ obj-$(CONFIG_DRM_SUN4I_HDMI)	+= sun4i-drm-hdmi.o
+ obj-$(CONFIG_DRM_SUN8I_MIXER)		+= sun8i-mixer.o
 +
 +obj-$(CONFIG_DRM_DW_HDMI_SUNXI)	+= dw_hdmi-sunxi.o
 diff --git a/drivers/gpu/drm/sun4i/dw_hdmi-sunxi.c b/drivers/gpu/drm/sun4i/dw_hdmi-sunxi.c

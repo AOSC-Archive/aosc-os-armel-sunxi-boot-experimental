@@ -1,7 +1,7 @@
---- linux-4.11.old/arch/arm/boot/dts/sun8i-h3-orangepi-2.dts	2017-05-01 10:47:48.000000000 +0800
-+++ linux-4.11/arch/arm/boot/dts/sun8i-h3-orangepi-2.dts	2017-05-05 21:18:51.397474993 +0800
-@@ -105,10 +105,18 @@
- 	};
+--- a/arch/arm/boot/dts/sun8i-h3-orangepi-2.dts	2017-07-17 19:30:22.758475498 +0800
++++ b/arch/arm/boot/dts/sun8i-h3-orangepi-2.dts	2017-07-17 23:36:21.869864844 +0800
+@@ -115,6 +115,10 @@
+ 	status = "okay";
  };
  
 +&de {
@@ -9,6 +9,9 @@
 +};
 +
  &ehci1 {
+ 	status = "okay";
+ };
+@@ -126,6 +130,10 @@
  	status = "okay";
  };
  
@@ -19,7 +22,7 @@
  &ir {
  	pinctrl-names = "default";
  	pinctrl-0 = <&ir_pins_a>;
-@@ -172,6 +180,10 @@
+@@ -189,6 +197,10 @@
  	status = "okay";
  };
  
