@@ -38,10 +38,9 @@ nanopi_neo=sun8i-h3-nanopi-neo
 nanopi_m1=sun8i-h3-nanopi-m1
 Bananapi_M2_Ultra=sun8i-r40-bananapi-m2-ultra
 
-q8_a13_tablet=sun5i-a13-q8
-q8_a23_tablet_800x480=sun8i-a23-q8
-q8_a33_tablet_800x480=sun8i-a33-q8
-q8_a33_tablet_1024x600=sun8i-a33-q8-1024x600
+q8_a13_tablet=sun5i-a13-q8-tablet
+q8_a23_tablet_800x480=sun8i-a23-q8-tablet
+q8_a33_tablet_1024x600=sun8i-a33-q8-tablet
 "
 DTB_TARGETS="
 sun4i-a10-cubieboard=sun4i-a10-cubieboard
@@ -82,8 +81,7 @@ sun8i-h3-nanopi-neo=sun8i-h3-nanopi-neo
 sun8i-h3-nanopi-m1=sun8i-h3-nanopi-m1
 
 
-sun5i-a13-q8-tablet=sun5i-a13-q8
-sun8i-a23-q8-tablet=sun8i-a23-q8
-sun8i-a33-q8-tablet=sun8i-a33-q8
-sun8i-a33-q8-tablet=sun8i-a33-q8-1024x600
+sun5i-a13-q8-tablet=sun5i-a13-q8-tablet
+sun8i-a23-q8-tablet=sun8i-a23-q8-tablet
+sun8i-a33-q8-tablet=sun8i-a33-q8-tablet
 "

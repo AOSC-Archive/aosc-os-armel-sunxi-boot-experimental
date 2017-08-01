@@ -13,11 +13,14 @@ if [ "$(echo u-boot-*.tar.* | wc -w)" != "1" ]; then
 	echo "More than one u-boot sources. Exit."
 	exit 1
 fi
-LINUX_SRC="$(echo linux-*.tar.*)"
-UBOOT_SRC="$(echo u-boot-*.tar.*)"
+LINUX_SRC="https://github.com/AOSC-Dev/linux"
+UBOOT_SRC="https://github.com/AOSC-Dev/u-boot"
 
-LINUX_DIR="$(echo $LINUX_SRC | sed 's/\.tar\..*//g')"
-UBOOT_DIR="$(echo $UBOOT_SRC | sed 's/\.tar\..*//g')"
+LINUX_BRANCH="aosc-sunxi-4.13-rc3"
+UBOOT_BRANCH="aosc-sunxi-v2017.09-rc1"
+
+LINUX_DIR="linux"
+UBOOT_DIR="u-boot"
 
 echo "Building u-boot..."
 
@@ -35,12 +38,8 @@ do
 	UBOOT_AOSCNAME="$(echo $i | cut -d = -f 2)"
 	echo "Building u-boot for device $UBOOT_AOSCNAME..."
 	rm -rf "$UBOOT_DIR"
-	tar xf "$UBOOT_SRC"
+	git clone "$UBOOT_SRC" -b "$UBOOT_BRANCH" --depth 1
 	pushd "$UBOOT_DIR"
-	for i in ../patches/u-boot/*
-	do
-		patch -Np1 -i $i >> "$LOG_DIR"/patches/u-boot.log
-	done
 	mkdir -p "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"
 	make "${UBOOT_CNAME}"_defconfig > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/config.log 2>&1
 	sed -i 's/# CONFIG_OF_LIBFDT_OVERLAY is not set/CONFIG_OF_LIBFDT_OVERLAY=y/g' .config # Configure fdt overlay command
@@ -51,23 +50,16 @@ do
 	cp u-boot-sunxi-with-spl.bin "$OUT_DIR"/u-boot-"$UBOOT_AOSCNAME"/
 	echo "Copied"
 	popd
-	rm -r "$UBOOT_DIR"
+	rm -rf "$UBOOT_DIR"
 done
 
 echo "Building linux..."
 
 if [ "$BUILD_LINUX" != "0" ]; then
 	echo "Building linux for KVM-disabled sunxi CPUs..."
-	if [ ! -d "$LINUX_DIR" ]; then
-		tar xf "$LINUX_SRC"
-		pushd "$LINUX_DIR"
-		for i in ../patches/linux/*
-		do
-			patch -Np1 -i $i >> "$LOG_DIR"/patches/linux.log
-		done
-	else
-		pushd "$LINUX_DIR"
-	fi
+	rm -rf "$LINUX_DIR"
+	git clone "$LINUX_SRC" -b "$LINUX_BRANCH" --depth 1
+	pushd "$LINUX_DIR"
 	mkdir -p "$LOG_DIR"/linux-sunxi-nokvm
 	cp ../sunxi-nokvm-config .config
 	echo "Configured"

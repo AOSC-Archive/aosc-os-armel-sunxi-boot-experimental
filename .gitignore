@@ -1,5 +1,5 @@
-linux-*
-u-boot-*
+linux
+u-boot
 out
 log
 out-*
