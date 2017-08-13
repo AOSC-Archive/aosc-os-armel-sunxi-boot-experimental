@@ -22,7 +22,11 @@ UBOOT_BRANCH="aosc-sunxi-v2017.09-rc1"
 LINUX_DIR="linux"
 UBOOT_DIR="u-boot"
 
-echo "Building u-boot..."
+UBOOT_CLONE_DIR="u-boot-repo"
+
+echo "Cloning u-boot..."
+rm -rf "$UBOOT_CLONE_DIR"
+git clone "$UBOOT_SRC" "$UBOOT_CLONE_DIR" -b "$UBOOT_BRANCH" --depth 1
 
 OUT_DIR="${PWD}/out"
 mkdir -p "$OUT_DIR"
@@ -31,6 +35,8 @@ LOG_DIR="${PWD}/log"
 mkdir -p "$LOG_DIR"
 mkdir -p "$LOG_DIR"/patches
 
+echo "Building u-boot..."
+
 [ "$BUILD_UBOOT" != "0" ] &&
 for i in $UBOOT_TARGETS
 do
@@ -38,7 +44,7 @@ do
 	UBOOT_AOSCNAME="$(echo $i | cut -d = -f 2)"
 	echo "Building u-boot for device $UBOOT_AOSCNAME..."
 	rm -rf "$UBOOT_DIR"
-	git clone "$UBOOT_SRC" -b "$UBOOT_BRANCH" --depth 1
+	cp -r "$UBOOT_CLONE_DIR" "$UBOOT_DIR"
 	pushd "$UBOOT_DIR"
 	mkdir -p "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"
 	make "${UBOOT_CNAME}"_defconfig > "$LOG_DIR"/u-boot-"$UBOOT_AOSCNAME"/config.log 2>&1
