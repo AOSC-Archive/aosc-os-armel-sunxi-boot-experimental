@@ -1,5 +1,6 @@
 linux
 u-boot
+u-boot-repo
 out
 log
 out-*
