@@ -16,7 +16,7 @@ fi
 LINUX_SRC="https://github.com/AOSC-Dev/linux"
 UBOOT_SRC="https://github.com/AOSC-Dev/u-boot"
 
-LINUX_BRANCH="aosc-sunxi-4.13-rc4"
+LINUX_BRANCH="aosc-sunxi-4.13-rc5"
 UBOOT_BRANCH="aosc-sunxi-v2017.09-rc1"
 
 LINUX_DIR="linux"
